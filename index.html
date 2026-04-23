@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>AI Resume Analyzer Pro</title>
+<style>
+body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+.container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; }
+h1 { color: #333; }
+.api-section { background: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; }
+.input-group { margin: 15px 0; }
+label { display: block; font-weight: bold; margin-bottom: 5px; }
+input, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: Arial, sans-serif; }
+textarea { min-height: 100px; resize: vertical; }
+button { padding: 10px 20px; margin: 5px 5px 5px 0; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+.btn-primary { background: #007bff; color: white; }
+.btn-primary:hover { background: #0056b3; }
+.btn-danger { background: #dc3545; color: white; }
+.btn-danger:hover { background: #c82333; }
+.error { color: #dc3545; margin: 10px 0; }
+.success { color: #28a745; margin: 10px 0; }
+.results { margin-top: 30px; display: none; }
+.tab-buttons { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid #ddd; }
+.tab-btn { padding: 10px 20px; background: #f0f0f0; border: none; cursor: pointer; border-bottom: 3px solid transparent; }
+.tab-btn.active { background: white; border-bottom-color: #007bff; font-weight: bold; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+.score-card { background: #f9f9f9; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 5px solid #007bff; }
+.score-value { font-size: 28px; font-weight: bold; color: #007bff; }
+.loading { text-align: center; padding: 20px; }
+.spinner { display: inline-block; width: 30px; height: 30px; border: 3px solid #f3f3f3; border-top: 3px solid #007bff; border-radius: 50%; animation: spin 1s linear infinite; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>AI Resume Analyzer Pro</h1>
+  <p>Analyze your resume with AI - powered by Google Gemini</p>
+
+  <div class="api-section">
+    <h3>Step 1: Enter your Gemini API Key</h3>
+    <p>Get your free API key at: <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a></p>
+    <div class="input-group">
+      <input type="password" id="apiKey" placeholder="Paste your Gemini API key here...">
+      <button class="btn-primary" onclick="saveKey()">Save Key</button>
+      <button class="btn-danger" onclick="clearKey()">Clear Key</button>
+    </div>
+    <div id="keyStatus"></div>
+  </div>
+
+  <div class="input-group">
+    <label>Your Resume:</label>
+    <textarea id="resumeText" placeholder="Paste your resume text here..."></textarea>
+  </div>
+
+  <div class="input-group">
+    <label>Target Job Title:</label>
+    <input type="text" id="jobTitle" placeholder="e.g. Full Stack Developer">
+  </div>
+
+  <div class="input-group">
+    <label>Job Description (optional):</label>
+    <textarea id="jobDescription" placeholder="Paste job description here for matching..."></textarea>
+  </div>
+
+  <button class="btn-primary" onclick="analyzeResume()" style="width: 200px; padding: 15px; font-size: 16px;">Analyze Resume</button>
+  <div id="errorMsg" class="error"></div>
+
+  <div id="results" class="results">
+    <div class="tab-buttons">
+      <button class="tab-btn active" onclick="switchTab('analysis')">Analysis</button>
+      <button class="tab-btn" onclick="switchTab('match')">Job Match</button>
+      <button class="tab-btn" onclick="switchTab('rewrite')">Rewrite Bullets</button>
+      <button class="tab-btn" onclick="switchTab('cover')">Cover Letter</button>
+    </div>
+
+    <div id="analysis" class="tab-content active"></div>
+    <div id="match" class="tab-content"></div>
+    <div id="rewrite" class="tab-content"></div>
+    <div id="cover" class="tab-content"></div>
+  </div>
+</div>
+
+<script>
+var GEMINI_KEY = "";
+var analysisData = null;
+
+window.addEventListener("DOMContentLoaded", function() {
+  GEMINI_KEY = localStorage.getItem("gemini_api_key") || "";
+  if (GEMINI_KEY) {
+    document.getElementById("apiKey").value = GEMINI_KEY;
+    document.getElementById("keyStatus").innerHTML = "<div class='success'>API key loaded successfully</div>";
+  }
+});
+
+function saveKey() {
+  var key = document.getElementById("apiKey").value.trim();
+  if (!key) {
+    alert("Please paste your API key");
+    return;
+  }
+  GEMINI_KEY = key;
+  localStorage.setItem("gemini_api_key", key);
+  document.getElementById("keyStatus").innerHTML = "<div class='success'>API key saved!</div>";
+}
+
+function clearKey() {
+  localStorage.removeItem("gemini_api_key");
+  GEMINI_KEY = "";
+  document.getElementById("apiKey").value = "";
+  document.getElementById("keyStatus").innerHTML = "<div class='error'>API key cleared</div>";
+}
+
+function switchTab(tab) {
+  var tabs = document.querySelectorAll(".tab-content");
+  tabs.forEach(function(t) { t.classList.remove("active"); });
+  document.getElementById(tab).classList.add("active");
+  
+  var btns = document.querySelectorAll(".tab-btn");
+  btns.forEach(function(b) { b.classList.remove("active"); });
+  event.target.classList.add("active");
+}
+
+async function callGemini(prompt) {
+  var response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-goog-api-key": GEMINI_KEY
+    },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.3, maxOutputTokens: 800 }
+    })
+  });
+  var data = await response.json();
+  if (data.error) throw new Error(data.error.message);
+  return data.candidates[0].content.parts[0].text;
+}
+
+async function analyzeResume() {
+  var resume = document.getElementById("resumeText").value.trim();
+  var jobTitle = document.getElementById("jobTitle").value.trim();
+  var jobDesc = document.getElementById("jobDescription").value.trim();
+  var errorDiv = document.getElementById("errorMsg");
+  errorDiv.innerHTML = "";
+
+  if (!GEMINI_KEY) {
+    errorDiv.innerHTML = "<strong>Error:</strong> Please save your API key first!";
+    return;
+  }
+  if (resume.length < 50) {
+    errorDiv.innerHTML = "<strong>Error:</strong> Please paste your complete resume";
+    return;
+  }
+
+  document.getElementById("results").style.display = "block";
+  document.getElementById("analysis").innerHTML = "<div class='loading'><div class='spinner'></div><p>Analyzing resume...</p></div>";
+  document.getElementById("match").innerHTML = jobDesc ? "<div class='loading'><div class='spinner'></div><p>Matching with job...</p></div>" : "";
+  document.getElementById("rewrite").innerHTML = "<div class='loading'><div class='spinner'></div><p>Finding rewrite opportunities...</p></div>";
+  document.getElementById("cover").innerHTML = "<div class='loading'><div class='spinner'></div><p>Drafting cover letter...</p></div>";
+
+  try {
+    var p1 = "Analyze this resume and return ONLY valid JSON with no markdown or backticks:\n{\"score\": 80, \"ats_score\": 75, \"impact\": 70, \"skills\": [\"JavaScript\", \"React\"], \"strengths\": [\"point1\", \"point2\"], \"improvements\": [\"point1\", \"point2\"], \"summary\": \"Brief assessment\"}\nResume:\n" + resume.substring(0, 2000) + "\nTarget: " + jobTitle;
+    
+    var r1 = await callGemini(p1);
+    try {
+      analysisData = JSON.parse(r1.replace(/```json/g, "").replace(/```/g, "").trim());
+      var html = "<div class='score-card'><strong>Overall Score:</strong> <div class='score-value'>" + analysisData.score + "/100</div></div>";
+      html += "<div class='score-card'><strong>ATS Score:</strong> <div class='score-value'>" + analysisData.ats_score + "/100</div></div>";
+      html += "<div class='score-card'><strong>Impact Score:</strong> <div class='score-value'>" + analysisData.impact + "/100</div></div>";
+      html += "<h3>Summary:</h3><p>" + analysisData.summary + "</p>";
+      html += "<h3>Strengths:</h3><ul><li>" + (analysisData.strengths || []).join("</li><li>") + "</li></ul>";
+      html += "<h3>Improvements:</h3><ul><li>" + (analysisData.improvements || []).join("</li><li>") + "</li></ul>";
+      document.getElementById("analysis").innerHTML = html;
+    } catch(e) {
+      document.getElementById("analysis").innerHTML = "<p>Response: " + r1 + "</p>";
+    }
+
+    if (jobDesc) {
+      var p2 = "Compare this resume to the job description and return JSON:\n{\"match_score\": 75, \"matched_keywords\": [\"skill1\"], \"missing\": [\"skill2\"], \"verdict\": \"Assessment\"}\nResume:\n" + resume.substring(0, 1500) + "\n\nJob Description:\n" + jobDesc.substring(0, 1500);
+      var r2 = await callGemini(p2);
+      try {
+        var matchData = JSON.parse(r2.replace(/```json/g, "").replace(/```/g, "").trim());
+        var mhtml = "<div class='score-card'><strong>Match Score:</strong> <div class='score-value'>" + matchData.match_score + "%</div></div>";
+        mhtml += "<p>" + matchData.verdict + "</p>";
+        mhtml += "<h3>Matched:</h3><p>" + matchData.matched_keywords.join(", ") + "</p>";
+        mhtml += "<h3>Missing Skills:</h3><p>" + matchData.missing.join(", ") + "</p>";
+        document.getElementById("match").innerHTML = mhtml;
+      } catch(e) {
+        document.getElementById("match").innerHTML = "<p>" + r2 + "</p>";
+      }
+    }
+
+    var p3 = "Rewrite 2 resume bullet points to be more impactful. Return JSON:\n{\"bullets\": [{\"original\": \"text\", \"rewritten\": \"improved\"}, {\"original\": \"text\", \"rewritten\": \"improved\"}]}\nResume:\n" + resume.substring(0, 2000);
+    var r3 = await callGemini(p3);
+    try {
+      var rewriteData = JSON.parse(r3.replace(/```json/g, "").replace(/```/g, "").trim());
+      var rhtml = "<h3>Bullet Rewrites:</h3>";
+      (rewriteData.bullets || []).forEach(function(b) {
+        rhtml += "<div style='margin: 15px 0; padding: 10px; background: #f0f0f0;'>";
+        rhtml += "<p><strong>Before:</strong> " + b.original + "</p>";
+        rhtml += "<p><strong>After:</strong> <span style='color: green; font-weight: bold;'>" + b.rewritten + "</span></p>";
+        rhtml += "</div>";
+      });
+      document.getElementById("rewrite").innerHTML = rhtml;
+    } catch(e) {
+      document.getElementById("rewrite").innerHTML = "<p>" + r3 + "</p>";
+    }
+
+    var p4 = "Write a professional, compelling cover letter. Return ONLY valid JSON with no markdown:\n{\"letter\": \"[Professional cover letter with 4-5 paragraphs]\"}\n\nRequirements:\n- Address the hiring manager professionally\n- Opening: Strong statement about why you want this role and company\n- Body 1: 2-3 key achievements from resume relevant to the position\n- Body 2: Specific skills that match the job role, show enthusiasm\n- Closing: Professional call to action and thank you\n- Use professional business tone, not generic, personalized\n- Length: 250-350 words\n\nResume:\n" + resume.substring(0, 2000) + "\n\nTarget Job Title:\n" + jobTitle + "\n\nJob Description:\n" + (jobDesc ? jobDesc.substring(0, 1000) : "Software development role requiring technical skills and leadership");
+    var r4 = await callGemini(p4);
+    try {
+      var coverData = JSON.parse(r4.replace(/```json/g, "").replace(/```/g, "").trim());
+      var coverHtml = "<div style='background: white; padding: 20px; border: 1px solid #ddd; border-radius: 5px; font-family: Georgia, serif; line-height: 1.8; color: #333;'>";
+      coverHtml += "<p style='white-space: pre-wrap; margin: 0;'>" + coverData.letter + "</p>";
+      coverHtml += "</div>";
+      coverHtml += "<button class='btn-primary' onclick='copyCoverText()' style='margin-top: 15px;'>Copy to Clipboard</button>";
+      document.getElementById("cover").innerHTML = coverHtml;
+    } catch(e) {
+      document.getElementById("cover").innerHTML = "<p>" + r4 + "</p>";
+    }
+
+  } catch (error) {
+    document.getElementById("analysis").innerHTML = "<div class='error'><strong>Error:</strong> " + error.message + "</div>";
+  }
+}
+</script>
+
+</body>
+</html>
