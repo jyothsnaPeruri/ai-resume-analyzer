@@ -1,232 +1,564 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>AI Resume Analyzer Pro</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resume Analyzer — AI feedback, job match and cover letter</title>
+<meta name="description" content="Upload or paste your resume and get an ATS score, strengths, improvements, job-description match, rewritten bullets and a cover letter — powered by Google Gemini. Built by Jyothsna (Jo) Peruri.">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
-.container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; }
-h1 { color: #333; }
-.api-section { background: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; }
-.input-group { margin: 15px 0; }
-label { display: block; font-weight: bold; margin-bottom: 5px; }
-input, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: Arial, sans-serif; }
-textarea { min-height: 100px; resize: vertical; }
-button { padding: 10px 20px; margin: 5px 5px 5px 0; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-.btn-primary { background: #007bff; color: white; }
-.btn-primary:hover { background: #0056b3; }
-.btn-danger { background: #dc3545; color: white; }
-.btn-danger:hover { background: #c82333; }
-.error { color: #dc3545; margin: 10px 0; }
-.success { color: #28a745; margin: 10px 0; }
-.results { margin-top: 30px; display: none; }
-.tab-buttons { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid #ddd; }
-.tab-btn { padding: 10px 20px; background: #f0f0f0; border: none; cursor: pointer; border-bottom: 3px solid transparent; }
-.tab-btn.active { background: white; border-bottom-color: #007bff; font-weight: bold; }
-.tab-content { display: none; }
-.tab-content.active { display: block; }
-.score-card { background: #f9f9f9; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 5px solid #007bff; }
-.score-value { font-size: 28px; font-weight: bold; color: #007bff; }
-.loading { text-align: center; padding: 20px; }
-.spinner { display: inline-block; width: 30px; height: 30px; border: 3px solid #f3f3f3; border-top: 3px solid #007bff; border-radius: 50%; animation: spin 1s linear infinite; }
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  :root {
+    --bg: #f5f6fb;
+    --surface: #ffffff;
+    --surface-2: #eef0f8;
+    --border: #e1e4ef;
+    --text: #131625;
+    --muted: #666d85;
+    --accent: #2f6fed;
+    --accent-strong: #2158c7;
+    --accent-soft: #e6eeff;
+    --accent-text: #1d4fb8;
+    --success: #1a9c5c;
+    --success-soft: #e4f7ec;
+    --warn: #c7790c;
+    --warn-soft: #fff3df;
+    --danger: #d43c3c;
+    --danger-soft: #ffe9e9;
+    --ring: rgba(47, 111, 237, .32);
+    --shadow: 0 1px 2px rgba(19, 22, 37, .04), 0 12px 32px -16px rgba(19, 22, 37, .22);
+    --radius: 18px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0b0d16;
+      --surface: #131625;
+      --surface-2: #1a1e30;
+      --border: #272c44;
+      --text: #ecEEf8;
+      --muted: #9aa2bd;
+      --accent: #6f9cff;
+      --accent-strong: #8db1ff;
+      --accent-soft: #1b2745;
+      --accent-text: #a9c2ff;
+      --success: #3fd58a;
+      --success-soft: #11301f;
+      --warn: #f0a640;
+      --warn-soft: #33260f;
+      --danger: #ff6d6d;
+      --danger-soft: #3a1717;
+      --ring: rgba(111, 156, 255, .4);
+      --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 14px 36px -16px rgba(0, 0, 0, .8);
+    }
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: radial-gradient(1100px 500px at 50% -180px, var(--accent-soft), transparent 70%), var(--bg);
+    color: var(--text);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent-text); }
+  button { font: inherit; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 32px 16px 64px; }
+
+  /* Header */
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 36px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; letter-spacing: -.01em; }
+  .brand .logo { width: 32px; height: 32px; border-radius: 10px; background: linear-gradient(135deg, var(--accent), #7c4dff); display: grid; place-items: center; color: #fff; font-size: 15px; }
+  .pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid var(--border); background: var(--surface); border-radius: 999px; font-size: 12px; color: var(--muted); }
+  .pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
+  .pill.ok .dot { background: var(--success); }
+
+  .hero { text-align: center; margin-bottom: 28px; }
+  .hero h1 { font-size: clamp(30px, 5vw, 44px); line-height: 1.1; letter-spacing: -.03em; margin: 0 0 12px; font-weight: 700; }
+  .hero h1 span { color: var(--accent); }
+  .hero p { margin: 0 auto; max-width: 540px; color: var(--muted); font-size: 15px; }
+
+  /* Cards */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; margin-bottom: 14px; }
+  .card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+  .step { display: inline-flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15px; }
+  .step .n { width: 24px; height: 24px; border-radius: 50%; background: var(--accent-soft); color: var(--accent-text); display: grid; place-items: center; font-size: 12px; font-weight: 700; }
+  .hint { font-size: 12.5px; color: var(--muted); }
+  label.lbl { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+  .field { width: 100%; padding: 11px 13px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2); color: var(--text); font: inherit; font-size: 14px; transition: border-color .15s, box-shadow .15s; }
+  .field:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px var(--ring); background: var(--surface); }
+  textarea.field { min-height: 130px; resize: vertical; line-height: 1.5; }
+  .row { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; }
+  @media (max-width: 640px) { .row { grid-template-columns: 1fr; } }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 16px; border-radius: 12px; border: 1px solid transparent; cursor: pointer; font-weight: 500; font-size: 14px; transition: background .15s, border-color .15s, opacity .15s, transform .1s; }
+  .btn:active { transform: translateY(1px); }
+  .btn:focus-visible { outline: none; box-shadow: 0 0 0 4px var(--ring); }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent-strong); }
+  .btn-ghost { background: var(--surface); border-color: var(--border); color: var(--text); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent-text); }
+  .btn-sm { padding: 6px 11px; font-size: 12.5px; border-radius: 9px; }
+  .btn[disabled] { opacity: .5; cursor: not-allowed; }
+  .btn-big { width: 100%; padding: 14px 18px; font-size: 15px; border-radius: 14px; }
+
+  /* Key section */
+  .key-row { display: flex; gap: 8px; }
+  .key-row .field { flex: 1; }
+  .status { font-size: 12.5px; margin-top: 8px; display: flex; align-items: center; gap: 6px; }
+  .status.ok { color: var(--success); }
+  .status.err { color: var(--danger); }
+  details summary { cursor: pointer; list-style: none; }
+  details summary::-webkit-details-marker { display: none; }
+  .chev { transition: transform .2s; display: inline-block; }
+  details[open] .chev { transform: rotate(90deg); }
+
+  /* Tabs (input + results) */
+  .tabs { display: flex; gap: 4px; padding: 4px; background: var(--surface-2); border-radius: 12px; width: fit-content; max-width: 100%; overflow-x: auto; }
+  .tab { padding: 7px 14px; border-radius: 9px; border: none; background: transparent; color: var(--muted); font-weight: 500; font-size: 13px; cursor: pointer; white-space: nowrap; }
+  .tab.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+  .tab .badge { margin-left: 6px; font-size: 11px; padding: 1px 6px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-text); }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* Dropzone */
+  .drop { border: 1.5px dashed var(--border); border-radius: 14px; padding: 28px 16px; text-align: center; background: var(--surface-2); transition: border-color .15s, background .15s; cursor: pointer; }
+  .drop.over, .drop:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .drop .ico { font-size: 28px; margin-bottom: 6px; }
+  .drop strong { display: block; font-size: 14px; }
+  .drop span { font-size: 12.5px; color: var(--muted); }
+  .file-ok { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: var(--success-soft); color: var(--success); font-size: 13px; }
+  .file-ok .btn { color: var(--success); }
+
+  /* Alerts */
+  .alert { padding: 12px 14px; border-radius: 12px; font-size: 13.5px; margin: 10px 0 0; display: none; }
+  .alert.show { display: block; }
+  .alert.err { background: var(--danger-soft); color: var(--danger); }
+
+  /* Results */
+  .results { display: none; }
+  .results.show { display: block; }
+  .scores { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+  .score { padding: 16px 12px; border-radius: 14px; background: var(--surface-2); text-align: center; }
+  .ring { width: 92px; height: 92px; margin: 0 auto 8px; position: relative; }
+  .ring svg { transform: rotate(-90deg); }
+  .ring circle.track { stroke: var(--border); }
+  .ring circle.val { stroke: var(--accent); stroke-linecap: round; transition: stroke-dashoffset 1s cubic-bezier(.2,.8,.2,1); }
+  .ring.good circle.val { stroke: var(--success); }
+  .ring.mid circle.val { stroke: var(--warn); }
+  .ring.low circle.val { stroke: var(--danger); }
+  .ring .num { position: absolute; inset: 0; display: grid; place-items: center; font-weight: 700; font-size: 20px; letter-spacing: -.02em; }
+  .score .lbl { font-size: 12.5px; color: var(--muted); font-weight: 500; }
+  .sec { margin-top: 18px; }
+  .sec h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--accent-text); margin: 0 0 8px; font-weight: 600; }
+  .sec p { margin: 0; font-size: 14.5px; }
+  .list { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+  .list li { display: flex; gap: 10px; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); font-size: 14px; }
+  .list li::before { content: ""; width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex: none; background: var(--accent); }
+  .list.good li::before { background: var(--success); }
+  .list.warn li::before { background: var(--warn); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font-size: 12.5px; padding: 4px 10px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); }
+  .chip.good { background: var(--success-soft); color: var(--success); border-color: transparent; }
+  .chip.warn { background: var(--warn-soft); color: var(--warn); border-color: transparent; }
+  .verdict { padding: 14px 16px; border-radius: 14px; background: var(--accent-soft); color: var(--accent-text); font-size: 14.5px; }
+  .rw { padding: 14px; border-radius: 14px; background: var(--surface-2); margin-bottom: 10px; }
+  .rw .tag { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
+  .rw .after { border-left: 3px solid var(--success); padding-left: 12px; margin-top: 10px; }
+  .rw .after .tag { color: var(--success); }
+  .rw p { margin: 0; font-size: 14px; }
+  .letter { white-space: pre-wrap; font-size: 14.5px; line-height: 1.75; padding: 20px; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--border); }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .empty { color: var(--muted); font-size: 14px; padding: 24px; text-align: center; background: var(--surface-2); border-radius: 14px; }
+
+  /* Skeleton */
+  @keyframes shimmer { from { background-position: -600px 0; } to { background-position: 600px 0; } }
+  .sk { border-radius: 8px; height: 14px; margin-bottom: 10px; background: linear-gradient(90deg, var(--surface-2) 25%, var(--border) 50%, var(--surface-2) 75%); background-size: 1200px 100%; animation: shimmer 1.4s linear infinite; }
+  .sk.w60 { width: 60%; } .sk.w80 { width: 80%; } .sk.w40 { width: 40%; } .sk.tall { height: 90px; }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  .rise { animation: rise .35s ease both; }
+  .spin { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; animation: rot .8s linear infinite; }
+  @keyframes rot { to { transform: rotate(360deg); } }
+
+  footer { text-align: center; color: var(--muted); font-size: 12.5px; margin-top: 40px; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 </style>
 </head>
 <body>
+<div class="wrap">
 
-<div class="container">
-  <h1>AI Resume Analyzer Pro</h1>
-  <p>Analyze your resume with AI - powered by Google Gemini</p>
+  <div class="top">
+    <div class="brand"><div class="logo">✦</div> Resume Analyzer</div>
+    <div class="pill" id="keyPill"><span class="dot"></span><span id="keyPillText">No API key</span></div>
+  </div>
 
-  <div class="api-section">
-    <h3>Step 1: Enter your Gemini API Key</h3>
-    <p>Get your free API key at: <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a></p>
-    <div class="input-group">
-      <input type="password" id="apiKey" placeholder="Paste your Gemini API key here...">
-      <button class="btn-primary" onclick="saveKey()">Save Key</button>
-      <button class="btn-danger" onclick="clearKey()">Clear Key</button>
+  <section class="hero rise">
+    <h1>Know what a recruiter sees<br><span>before they do.</span></h1>
+    <p>Upload your resume and get an ATS score, honest strengths and gaps, a match against any job ad, rewritten bullets and a cover letter — in about 20 seconds.</p>
+  </section>
+
+  <!-- Step 1: key -->
+  <section class="card rise">
+    <details id="keyBox" open>
+      <summary>
+        <div class="card-head" style="margin:0">
+          <div class="step"><span class="n">1</span> Connect Google Gemini <span class="chev">›</span></div>
+          <span class="hint">Free key · stays in this browser only</span>
+        </div>
+      </summary>
+      <div style="margin-top:14px">
+        <p class="hint" style="margin:0 0 10px">Get a free key at <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">aistudio.google.com</a>. It is stored in your browser's localStorage and sent only to Google's API — never to any other server.</p>
+        <div class="key-row">
+          <input class="field" type="password" id="apiKey" placeholder="Paste your Gemini API key" autocomplete="off" spellcheck="false">
+          <button class="btn btn-primary" id="saveKeyBtn" type="button">Save</button>
+          <button class="btn btn-ghost" id="clearKeyBtn" type="button">Clear</button>
+        </div>
+        <div class="status" id="keyStatus"></div>
+      </div>
+    </details>
+  </section>
+
+  <!-- Step 2: resume -->
+  <section class="card rise">
+    <div class="card-head">
+      <div class="step"><span class="n">2</span> Your resume</div>
+      <div class="tabs" role="tablist">
+        <button class="tab active" data-in="upload" type="button">Upload PDF</button>
+        <button class="tab" data-in="paste" type="button">Paste text</button>
+      </div>
     </div>
-    <div id="keyStatus"></div>
-  </div>
-
-  <div class="input-group">
-    <label>Your Resume:</label>
-    <textarea id="resumeText" placeholder="Paste your resume text here..."></textarea>
-  </div>
-
-  <div class="input-group">
-    <label>Target Job Title:</label>
-    <input type="text" id="jobTitle" placeholder="e.g. Full Stack Developer">
-  </div>
-
-  <div class="input-group">
-    <label>Job Description (optional):</label>
-    <textarea id="jobDescription" placeholder="Paste job description here for matching..."></textarea>
-  </div>
-
-  <button class="btn-primary" onclick="analyzeResume()" style="width: 200px; padding: 15px; font-size: 16px;">Analyze Resume</button>
-  <div id="errorMsg" class="error"></div>
-
-  <div id="results" class="results">
-    <div class="tab-buttons">
-      <button class="tab-btn active" onclick="switchTab('analysis')">Analysis</button>
-      <button class="tab-btn" onclick="switchTab('match')">Job Match</button>
-      <button class="tab-btn" onclick="switchTab('rewrite')">Rewrite Bullets</button>
-      <button class="tab-btn" onclick="switchTab('cover')">Cover Letter</button>
+    <div class="panel active" data-inpanel="upload">
+      <div class="drop" id="drop" tabindex="0" role="button" aria-label="Upload a PDF resume">
+        <div class="ico">📄</div>
+        <strong>Drop your PDF here or click to choose</strong>
+        <span>Text is extracted locally in your browser</span>
+        <input type="file" id="file" accept="application/pdf,.pdf,.txt" class="sr-only">
+      </div>
+      <div class="file-ok" id="fileOk" style="display:none">
+        <span id="fileName"></span>
+        <button class="btn btn-ghost btn-sm" type="button" id="fileClear">Remove</button>
+      </div>
     </div>
+    <div class="panel" data-inpanel="paste">
+      <textarea class="field" id="resumeText" placeholder="Paste the full text of your resume…"></textarea>
+    </div>
+    <div class="hint" id="resumeMeta" style="margin-top:8px"></div>
+  </section>
 
-    <div id="analysis" class="tab-content active"></div>
-    <div id="match" class="tab-content"></div>
-    <div id="rewrite" class="tab-content"></div>
-    <div id="cover" class="tab-content"></div>
-  </div>
+  <!-- Step 3: target -->
+  <section class="card rise">
+    <div class="card-head">
+      <div class="step"><span class="n">3</span> Target role</div>
+      <span class="hint">Job description unlocks the match score</span>
+    </div>
+    <div class="row">
+      <div>
+        <label class="lbl" for="jobTitle">Job title</label>
+        <input class="field" id="jobTitle" placeholder="e.g. Full Stack Developer">
+      </div>
+      <div>
+        <label class="lbl" for="company">Company (optional)</label>
+        <input class="field" id="company" placeholder="e.g. Atlassian">
+      </div>
+    </div>
+    <div style="margin-top:12px">
+      <label class="lbl" for="jobDescription">Job description (optional, recommended)</label>
+      <textarea class="field" id="jobDescription" placeholder="Paste the job ad here to get keyword matching and a tailored cover letter…"></textarea>
+    </div>
+    <div style="margin-top:14px">
+      <button class="btn btn-primary btn-big" id="analyzeBtn" type="button"><span id="analyzeLabel">Analyze my resume</span></button>
+    </div>
+    <div class="alert err" id="errorMsg" role="alert"></div>
+  </section>
+
+  <!-- Results -->
+  <section class="results" id="results">
+    <div class="card rise">
+      <div class="card-head">
+        <div class="step">Results</div>
+        <div class="tabs" role="tablist" id="resultTabs">
+          <button class="tab active" data-tab="analysis" type="button">Overview</button>
+          <button class="tab" data-tab="match" type="button">Job match</button>
+          <button class="tab" data-tab="rewrite" type="button">Rewrites</button>
+          <button class="tab" data-tab="cover" type="button">Cover letter</button>
+        </div>
+      </div>
+      <div class="panel active" id="analysis"></div>
+      <div class="panel" id="match"></div>
+      <div class="panel" id="rewrite"></div>
+      <div class="panel" id="cover"></div>
+    </div>
+  </section>
+
+  <footer>
+    Built by <a href="https://jyothsnaperuri.github.io/Jyothsna-portfolio/" target="_blank" rel="noopener">Jyothsna (Jo) Peruri</a> · Google Gemini · pdf.js · <a href="https://github.com/jyothsnaPeruri/ai-resume-analyzer" target="_blank" rel="noopener">Source</a>
+  </footer>
 </div>
 
-<script>
-var GEMINI_KEY = "";
-var analysisData = null;
-
-window.addEventListener("DOMContentLoaded", function() {
-  GEMINI_KEY = localStorage.getItem("gemini_api_key") || "";
-  if (GEMINI_KEY) {
-    document.getElementById("apiKey").value = GEMINI_KEY;
-    document.getElementById("keyStatus").innerHTML = "<div class='success'>API key loaded successfully</div>";
-  }
-});
-
-function saveKey() {
-  var key = document.getElementById("apiKey").value.trim();
-  if (!key) {
-    alert("Please paste your API key");
-    return;
-  }
-  GEMINI_KEY = key;
-  localStorage.setItem("gemini_api_key", key);
-  document.getElementById("keyStatus").innerHTML = "<div class='success'>API key saved!</div>";
-}
-
-function clearKey() {
-  localStorage.removeItem("gemini_api_key");
-  GEMINI_KEY = "";
-  document.getElementById("apiKey").value = "";
-  document.getElementById("keyStatus").innerHTML = "<div class='error'>API key cleared</div>";
-}
-
-function switchTab(tab) {
-  var tabs = document.querySelectorAll(".tab-content");
-  tabs.forEach(function(t) { t.classList.remove("active"); });
-  document.getElementById(tab).classList.add("active");
-  
-  var btns = document.querySelectorAll(".tab-btn");
-  btns.forEach(function(b) { b.classList.remove("active"); });
-  event.target.classList.add("active");
-}
-
-async function callGemini(prompt) {
-  var response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-goog-api-key": GEMINI_KEY
-    },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0.3, maxOutputTokens: 800 }
-    })
-  });
-  var data = await response.json();
-  if (data.error) throw new Error(data.error.message);
-  return data.candidates[0].content.parts[0].text;
-}
-
-async function analyzeResume() {
-  var resume = document.getElementById("resumeText").value.trim();
-  var jobTitle = document.getElementById("jobTitle").value.trim();
-  var jobDesc = document.getElementById("jobDescription").value.trim();
-  var errorDiv = document.getElementById("errorMsg");
-  errorDiv.innerHTML = "";
-
-  if (!GEMINI_KEY) {
-    errorDiv.innerHTML = "<strong>Error:</strong> Please save your API key first!";
-    return;
-  }
-  if (resume.length < 50) {
-    errorDiv.innerHTML = "<strong>Error:</strong> Please paste your complete resume";
-    return;
-  }
-
-  document.getElementById("results").style.display = "block";
-  document.getElementById("analysis").innerHTML = "<div class='loading'><div class='spinner'></div><p>Analyzing resume...</p></div>";
-  document.getElementById("match").innerHTML = jobDesc ? "<div class='loading'><div class='spinner'></div><p>Matching with job...</p></div>" : "";
-  document.getElementById("rewrite").innerHTML = "<div class='loading'><div class='spinner'></div><p>Finding rewrite opportunities...</p></div>";
-  document.getElementById("cover").innerHTML = "<div class='loading'><div class='spinner'></div><p>Drafting cover letter...</p></div>";
-
+<script type="module">
+  // pdf.js is loaded as a module and exposed for the main script. If the CDN fails, paste-text still works.
   try {
-    var p1 = "Analyze this resume and return ONLY valid JSON with no markdown or backticks:\n{\"score\": 80, \"ats_score\": 75, \"impact\": 70, \"skills\": [\"JavaScript\", \"React\"], \"strengths\": [\"point1\", \"point2\"], \"improvements\": [\"point1\", \"point2\"], \"summary\": \"Brief assessment\"}\nResume:\n" + resume.substring(0, 2000) + "\nTarget: " + jobTitle;
-    
-    var r1 = await callGemini(p1);
-    try {
-      analysisData = JSON.parse(r1.replace(/```json/g, "").replace(/```/g, "").trim());
-      var html = "<div class='score-card'><strong>Overall Score:</strong> <div class='score-value'>" + analysisData.score + "/100</div></div>";
-      html += "<div class='score-card'><strong>ATS Score:</strong> <div class='score-value'>" + analysisData.ats_score + "/100</div></div>";
-      html += "<div class='score-card'><strong>Impact Score:</strong> <div class='score-value'>" + analysisData.impact + "/100</div></div>";
-      html += "<h3>Summary:</h3><p>" + analysisData.summary + "</p>";
-      html += "<h3>Strengths:</h3><ul><li>" + (analysisData.strengths || []).join("</li><li>") + "</li></ul>";
-      html += "<h3>Improvements:</h3><ul><li>" + (analysisData.improvements || []).join("</li><li>") + "</li></ul>";
-      document.getElementById("analysis").innerHTML = html;
-    } catch(e) {
-      document.getElementById("analysis").innerHTML = "<p>Response: " + r1 + "</p>";
-    }
-
-    if (jobDesc) {
-      var p2 = "Compare this resume to the job description and return JSON:\n{\"match_score\": 75, \"matched_keywords\": [\"skill1\"], \"missing\": [\"skill2\"], \"verdict\": \"Assessment\"}\nResume:\n" + resume.substring(0, 1500) + "\n\nJob Description:\n" + jobDesc.substring(0, 1500);
-      var r2 = await callGemini(p2);
-      try {
-        var matchData = JSON.parse(r2.replace(/```json/g, "").replace(/```/g, "").trim());
-        var mhtml = "<div class='score-card'><strong>Match Score:</strong> <div class='score-value'>" + matchData.match_score + "%</div></div>";
-        mhtml += "<p>" + matchData.verdict + "</p>";
-        mhtml += "<h3>Matched:</h3><p>" + matchData.matched_keywords.join(", ") + "</p>";
-        mhtml += "<h3>Missing Skills:</h3><p>" + matchData.missing.join(", ") + "</p>";
-        document.getElementById("match").innerHTML = mhtml;
-      } catch(e) {
-        document.getElementById("match").innerHTML = "<p>" + r2 + "</p>";
-      }
-    }
-
-    var p3 = "Rewrite 2 resume bullet points to be more impactful. Return JSON:\n{\"bullets\": [{\"original\": \"text\", \"rewritten\": \"improved\"}, {\"original\": \"text\", \"rewritten\": \"improved\"}]}\nResume:\n" + resume.substring(0, 2000);
-    var r3 = await callGemini(p3);
-    try {
-      var rewriteData = JSON.parse(r3.replace(/```json/g, "").replace(/```/g, "").trim());
-      var rhtml = "<h3>Bullet Rewrites:</h3>";
-      (rewriteData.bullets || []).forEach(function(b) {
-        rhtml += "<div style='margin: 15px 0; padding: 10px; background: #f0f0f0;'>";
-        rhtml += "<p><strong>Before:</strong> " + b.original + "</p>";
-        rhtml += "<p><strong>After:</strong> <span style='color: green; font-weight: bold;'>" + b.rewritten + "</span></p>";
-        rhtml += "</div>";
-      });
-      document.getElementById("rewrite").innerHTML = rhtml;
-    } catch(e) {
-      document.getElementById("rewrite").innerHTML = "<p>" + r3 + "</p>";
-    }
-
-    var p4 = "Write a professional, compelling cover letter. Return ONLY valid JSON with no markdown:\n{\"letter\": \"[Professional cover letter with 4-5 paragraphs]\"}\n\nRequirements:\n- Address the hiring manager professionally\n- Opening: Strong statement about why you want this role and company\n- Body 1: 2-3 key achievements from resume relevant to the position\n- Body 2: Specific skills that match the job role, show enthusiasm\n- Closing: Professional call to action and thank you\n- Use professional business tone, not generic, personalized\n- Length: 250-350 words\n\nResume:\n" + resume.substring(0, 2000) + "\n\nTarget Job Title:\n" + jobTitle + "\n\nJob Description:\n" + (jobDesc ? jobDesc.substring(0, 1000) : "Software development role requiring technical skills and leadership");
-    var r4 = await callGemini(p4);
-    try {
-      var coverData = JSON.parse(r4.replace(/```json/g, "").replace(/```/g, "").trim());
-      var coverHtml = "<div style='background: white; padding: 20px; border: 1px solid #ddd; border-radius: 5px; font-family: Georgia, serif; line-height: 1.8; color: #333;'>";
-      coverHtml += "<p style='white-space: pre-wrap; margin: 0;'>" + coverData.letter + "</p>";
-      coverHtml += "</div>";
-      coverHtml += "<button class='btn-primary' onclick='copyCoverText()' style='margin-top: 15px;'>Copy to Clipboard</button>";
-      document.getElementById("cover").innerHTML = coverHtml;
-    } catch(e) {
-      document.getElementById("cover").innerHTML = "<p>" + r4 + "</p>";
-    }
-
-  } catch (error) {
-    document.getElementById("analysis").innerHTML = "<div class='error'><strong>Error:</strong> " + error.message + "</div>";
+    const pdfjs = await import("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs");
+    pdfjs.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";
+    window.pdfjsLib = pdfjs;
+  } catch (e) {
+    console.warn("pdf.js failed to load", e);
   }
-}
 </script>
 
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+  var KEY_STORAGE = "gemini_api_key";
+  var key = "";
+  var resumeFromFile = "";
+
+  /* ---------- helpers ---------- */
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function parseJSON(text) {
+    var t = String(text || "").replace(/```json/gi, "").replace(/```/g, "").trim();
+    var a = t.indexOf("{"), b = t.lastIndexOf("}");
+    if (a === -1 || b === -1) throw new Error("No JSON in response");
+    return JSON.parse(t.slice(a, b + 1));
+  }
+  function clamp(n) { n = Number(n); return isNaN(n) ? 0 : Math.max(0, Math.min(100, Math.round(n))); }
+  function ringClass(n) { return n >= 75 ? "good" : n >= 50 ? "mid" : "low"; }
+  function ring(label, value, suffix) {
+    var v = clamp(value), r = 40, c = 2 * Math.PI * r;
+    return '<div class="score"><div class="ring ' + ringClass(v) + '">' +
+      '<svg width="92" height="92" viewBox="0 0 92 92"><circle class="track" cx="46" cy="46" r="' + r + '" fill="none" stroke-width="8"/>' +
+      '<circle class="val" cx="46" cy="46" r="' + r + '" fill="none" stroke-width="8" stroke-dasharray="' + c + '" stroke-dashoffset="' + c + '" data-target="' + (c * (1 - v / 100)) + '"/></svg>' +
+      '<div class="num">' + v + (suffix || "") + '</div></div><div class="lbl">' + esc(label) + '</div></div>';
+  }
+  function animateRings(container) {
+    requestAnimationFrame(function () {
+      container.querySelectorAll("circle.val[data-target]").forEach(function (c) {
+        c.style.strokeDashoffset = c.getAttribute("data-target");
+      });
+    });
+  }
+  function list(items, cls) {
+    if (!items || !items.length) return '<div class="empty">Nothing here.</div>';
+    return '<ul class="list ' + (cls || "") + '">' + items.map(function (i) { return "<li>" + esc(i) + "</li>"; }).join("") + "</ul>";
+  }
+  function chips(items, cls) {
+    if (!items || !items.length) return '<span class="hint">None found.</span>';
+    return '<div class="chips">' + items.map(function (i) { return '<span class="chip ' + cls + '">' + esc(i) + "</span>"; }).join("") + "</div>";
+  }
+  function skeleton(rows) {
+    var h = "";
+    for (var i = 0; i < (rows || 4); i++) h += '<div class="sk ' + (i % 3 === 0 ? "w80" : i % 3 === 1 ? "" : "w60") + '"></div>';
+    return h;
+  }
+  function showError(msg) { var e = $("errorMsg"); e.textContent = msg; e.classList.add("show"); }
+  function hideError() { $("errorMsg").classList.remove("show"); }
+  function copyText(text, btn) {
+    navigator.clipboard.writeText(text).then(function () {
+      var old = btn.textContent; btn.textContent = "Copied ✓";
+      setTimeout(function () { btn.textContent = old; }, 1600);
+    });
+  }
+  function download(name, text) {
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([text], { type: "text/plain" }));
+    a.download = name; a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+  }
+
+  /* ---------- API key ---------- */
+  function setKeyUI(saved) {
+    var pill = $("keyPill");
+    pill.classList.toggle("ok", saved);
+    $("keyPillText").textContent = saved ? "Gemini connected" : "No API key";
+    if (saved) $("keyBox").removeAttribute("open");
+  }
+  key = localStorage.getItem(KEY_STORAGE) || "";
+  if (key) {
+    $("apiKey").value = key;
+    $("keyStatus").className = "status ok"; $("keyStatus").textContent = "✓ Key loaded from this browser";
+    setKeyUI(true);
+  }
+  $("saveKeyBtn").addEventListener("click", function () {
+    var k = $("apiKey").value.trim();
+    if (!k) { $("keyStatus").className = "status err"; $("keyStatus").textContent = "Paste a key first."; return; }
+    key = k; localStorage.setItem(KEY_STORAGE, k);
+    $("keyStatus").className = "status ok"; $("keyStatus").textContent = "✓ Saved in this browser";
+    setKeyUI(true);
+  });
+  $("clearKeyBtn").addEventListener("click", function () {
+    key = ""; localStorage.removeItem(KEY_STORAGE); $("apiKey").value = "";
+    $("keyStatus").className = "status"; $("keyStatus").textContent = "Key removed.";
+    setKeyUI(false);
+  });
+
+  /* ---------- input tabs ---------- */
+  document.querySelectorAll(".tab[data-in]").forEach(function (t) {
+    t.addEventListener("click", function () {
+      document.querySelectorAll(".tab[data-in]").forEach(function (x) { x.classList.remove("active"); });
+      document.querySelectorAll("[data-inpanel]").forEach(function (p) { p.classList.remove("active"); });
+      t.classList.add("active");
+      document.querySelector('[data-inpanel="' + t.dataset.in + '"]').classList.add("active");
+    });
+  });
+
+  /* ---------- file upload ---------- */
+  var drop = $("drop"), fileInput = $("file");
+  drop.addEventListener("click", function () { fileInput.click(); });
+  drop.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileInput.click(); } });
+  ["dragenter", "dragover"].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add("over"); }); });
+  ["dragleave", "drop"].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove("over"); }); });
+  drop.addEventListener("drop", function (e) { if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+  fileInput.addEventListener("change", function () { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
+  $("fileClear").addEventListener("click", function () {
+    resumeFromFile = ""; fileInput.value = ""; $("fileOk").style.display = "none"; $("resumeMeta").textContent = "";
+  });
+
+  async function extractPdf(file) {
+    if (!window.pdfjsLib) throw new Error("PDF reader is still loading (or blocked). Try again in a moment, or paste the text instead.");
+    var buf = await file.arrayBuffer();
+    var pdf = await window.pdfjsLib.getDocument({ data: buf }).promise;
+    var out = [];
+    for (var p = 1; p <= pdf.numPages; p++) {
+      var page = await pdf.getPage(p);
+      var content = await page.getTextContent();
+      var lastY = null, line = [];
+      content.items.forEach(function (it) {
+        var y = Math.round(it.transform[5]);
+        if (lastY !== null && Math.abs(y - lastY) > 2) { out.push(line.join(" ")); line = []; }
+        line.push(it.str); lastY = y;
+      });
+      out.push(line.join(" "));
+      out.push("");
+    }
+    return out.join("\n").replace(/[ \t]+/g, " ").replace(/\n{3,}/g, "\n\n").trim();
+  }
+  async function handleFile(file) {
+    hideError();
+    $("resumeMeta").textContent = "Reading " + file.name + "…";
+    try {
+      var text = /\.txt$/i.test(file.name) ? await file.text() : await extractPdf(file);
+      if (text.length < 50) throw new Error("Couldn't read much text from that file. If it's a scanned image, paste the text instead.");
+      resumeFromFile = text;
+      $("fileName").textContent = file.name + " · " + text.split(/\s+/).length + " words";
+      $("fileOk").style.display = "flex";
+      $("resumeMeta").textContent = "";
+    } catch (err) {
+      resumeFromFile = ""; $("fileOk").style.display = "none"; $("resumeMeta").textContent = "";
+      showError(err.message || "Could not read the file.");
+    }
+  }
+  function currentResume() {
+    var pasteActive = document.querySelector('.tab[data-in="paste"]').classList.contains("active");
+    return (pasteActive ? $("resumeText").value : resumeFromFile).trim();
+  }
+
+  /* ---------- results tabs ---------- */
+  function switchTab(name) {
+    document.querySelectorAll("#resultTabs .tab").forEach(function (b) { b.classList.toggle("active", b.dataset.tab === name); });
+    ["analysis", "match", "rewrite", "cover"].forEach(function (id) { $(id).classList.toggle("active", id === name); });
+  }
+  document.querySelectorAll("#resultTabs .tab").forEach(function (b) { b.addEventListener("click", function () { switchTab(b.dataset.tab); }); });
+
+  /* ---------- Gemini ---------- */
+  async function gemini(prompt, maxTokens) {
+    var res = await fetch(GEMINI_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.3, maxOutputTokens: maxTokens || 1200, responseMimeType: "application/json" }
+      })
+    });
+    var data = await res.json();
+    if (data.error) throw new Error(data.error.message || "Gemini request failed");
+    var parts = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts;
+    if (!parts || !parts.length) throw new Error("Gemini returned an empty response — try again.");
+    return parts.map(function (p) { return p.text || ""; }).join("");
+  }
+
+  /* ---------- renderers ---------- */
+  function renderAnalysis(d) {
+    var h = '<div class="scores">' + ring("Overall", d.score) + ring("ATS friendliness", d.ats_score) + ring("Impact", d.impact) + "</div>";
+    h += '<div class="sec"><h3>Summary</h3><p>' + esc(d.summary) + "</p></div>";
+    if (d.skills && d.skills.length) h += '<div class="sec"><h3>Skills detected</h3>' + chips(d.skills, "") + "</div>";
+    h += '<div class="sec"><h3>Strengths</h3>' + list(d.strengths, "good") + "</div>";
+    h += '<div class="sec"><h3>Improve next</h3>' + list(d.improvements, "warn") + "</div>";
+    $("analysis").innerHTML = h; animateRings($("analysis"));
+  }
+  function renderMatch(d) {
+    var h = '<div class="scores" style="grid-template-columns:150px 1fr;align-items:center">' + ring("Match", d.match_score, "%") +
+      '<div class="verdict">' + esc(d.verdict) + "</div></div>";
+    h += '<div class="sec"><h3>Matched keywords · ' + (d.matched_keywords || []).length + "</h3>" + chips(d.matched_keywords, "good") + "</div>";
+    h += '<div class="sec"><h3>Missing keywords · ' + (d.missing || []).length + "</h3>" + chips(d.missing, "warn") + '<p class="hint" style="margin-top:8px">Add the missing ones you genuinely have — in Skills and in a bullet where you used them.</p></div>';
+    if (d.tips && d.tips.length) h += '<div class="sec"><h3>How to tailor</h3>' + list(d.tips, "") + "</div>";
+    $("match").innerHTML = h; animateRings($("match"));
+  }
+  function renderRewrite(d) {
+    var items = d.bullets || [];
+    if (!items.length) { $("rewrite").innerHTML = '<div class="empty">No bullets to rewrite.</div>'; return; }
+    var h = items.map(function (b) {
+      return '<div class="rw"><div class="tag">Before</div><p>' + esc(b.original) + '</p><div class="after"><div class="tag">After</div><p>' + esc(b.rewritten) + "</p>" +
+        (b.why ? '<p class="hint" style="margin-top:6px">' + esc(b.why) + "</p>" : "") + "</div></div>";
+    }).join("");
+    h += '<div class="actions"><button class="btn btn-ghost btn-sm" type="button" id="copyRw">Copy all rewrites</button></div>';
+    $("rewrite").innerHTML = h;
+    $("copyRw").addEventListener("click", function () { copyText(items.map(function (b) { return "• " + b.rewritten; }).join("\n"), this); });
+  }
+  function renderCover(d) {
+    var letter = String(d.letter || "").trim();
+    $("cover").innerHTML = '<div class="letter">' + esc(letter) + '</div><div class="actions"><button class="btn btn-primary btn-sm" type="button" id="copyCover">Copy letter</button><button class="btn btn-ghost btn-sm" type="button" id="dlCover">Download .txt</button></div>';
+    $("copyCover").addEventListener("click", function () { copyText(letter, this); });
+    $("dlCover").addEventListener("click", function () { download("cover-letter.txt", letter); });
+  }
+  function renderFail(id, err) { $(id).innerHTML = '<div class="alert err show">' + esc(err && err.message ? err.message : "This part failed — try again.") + "</div>"; }
+
+  /* ---------- analyze ---------- */
+  $("analyzeBtn").addEventListener("click", analyze);
+  async function analyze() {
+    hideError();
+    var resume = currentResume();
+    var jobTitle = $("jobTitle").value.trim() || "the target role";
+    var company = $("company").value.trim();
+    var jd = $("jobDescription").value.trim();
+    if (!key) { showError("Add your Gemini API key in step 1 first."); $("keyBox").setAttribute("open", ""); return; }
+    if (resume.length < 50) { showError("Upload a PDF or paste your resume text first."); return; }
+
+    var btn = $("analyzeBtn");
+    btn.disabled = true; $("analyzeLabel").innerHTML = '<span class="spin"></span>&nbsp; Analyzing…';
+    $("results").classList.add("show");
+    $("analysis").innerHTML = '<div class="scores"><div class="sk tall"></div><div class="sk tall"></div><div class="sk tall"></div></div>' + skeleton(5);
+    $("match").innerHTML = jd ? skeleton(6) : '<div class="empty">Paste a job description in step 3 to get a keyword match.</div>';
+    $("rewrite").innerHTML = skeleton(6);
+    $("cover").innerHTML = skeleton(8);
+    switchTab("analysis");
+    $("results").scrollIntoView({ behavior: "smooth", block: "start" });
+
+    var r = resume.slice(0, 6000), j = jd.slice(0, 3000);
+    var pAnalysis = 'You are an expert technical recruiter. Assess this resume for the role "' + jobTitle + '". Be specific and honest; refer to actual lines in the resume. Return ONLY JSON:\n' +
+      '{"score": 0-100, "ats_score": 0-100, "impact": 0-100, "skills": ["..."], "strengths": ["3-5 specific points"], "improvements": ["3-5 specific, actionable points"], "summary": "2-3 sentence assessment"}\n\nRESUME:\n' + r;
+    var pMatch = 'Compare this resume to the job description. Return ONLY JSON:\n' +
+      '{"match_score": 0-100, "matched_keywords": ["skills/keywords present in both"], "missing": ["important keywords in the job ad absent from the resume"], "verdict": "2 sentences on fit", "tips": ["3 concrete edits to tailor this resume to this ad"]}\n\nRESUME:\n' + r + '\n\nJOB DESCRIPTION:\n' + j;
+    var pRewrite = 'Pick the 4 weakest bullet points in this resume and rewrite each to be specific, quantified where the resume gives numbers (never invent numbers — use [X] as a placeholder if a metric is missing), and led by a strong verb. Return ONLY JSON:\n' +
+      '{"bullets": [{"original": "exact original text", "rewritten": "improved text", "why": "one short sentence"}]}\n\nRESUME:\n' + r;
+    var pCover = 'Write a cover letter for the role "' + jobTitle + '"' + (company ? ' at ' + company : '') + '. 250-320 words, 4 paragraphs, professional but human, no clichés, no invented facts — use only what is in the resume. Address it "Dear Hiring Manager". Return ONLY JSON:\n{"letter": "full letter text with line breaks"}\n\nRESUME:\n' + r + (j ? '\n\nJOB DESCRIPTION:\n' + j : '');
+
+    var tasks = [
+      gemini(pAnalysis, 1200).then(function (t) { renderAnalysis(parseJSON(t)); }).catch(function (e) { renderFail("analysis", e); }),
+      jd ? gemini(pMatch, 1200).then(function (t) { renderMatch(parseJSON(t)); }).catch(function (e) { renderFail("match", e); }) : Promise.resolve(),
+      gemini(pRewrite, 1400).then(function (t) { renderRewrite(parseJSON(t)); }).catch(function (e) { renderFail("rewrite", e); }),
+      gemini(pCover, 1400).then(function (t) { renderCover(parseJSON(t)); }).catch(function (e) { renderFail("cover", e); })
+    ];
+    await Promise.all(tasks);
+    btn.disabled = false; $("analyzeLabel").textContent = "Analyze again";
+  }
+})();
+</script>
 </body>
 </html>
