@@ -4,181 +4,171 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Resume Analyzer — AI feedback, job match and cover letter</title>
-<meta name="description" content="Upload or paste your resume and get an ATS score, strengths, improvements, job-description match, rewritten bullets and a cover letter — powered by Google Gemini. Built by Jyothsna (Jo) Peruri.">
-<meta name="color-scheme" content="light dark">
+<meta name="description" content="Upload your resume and get an ATS score, strengths, improvements, job-description match, rewritten bullets and a cover letter — no sign-up, no API key. Built by Jyothsna (Jo) Peruri.">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#f6f3fb">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Cdefs%3E%3ClinearGradient id=%27g%27 x1=%270%27 y1=%270%27 x2=%271%27 y2=%271%27%3E%3Cstop offset=%270%27 stop-color=%27%236a55c9%27/%3E%3Cstop offset=%271%27 stop-color=%27%23d3785f%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width=%2764%27 height=%2764%27 rx=%2716%27 fill=%27url(%23g)%27/%3E%3Cpath d=%27M32 14l4.5 13.5L50 32l-13.5 4.5L32 50l-4.5-13.5L14 32l13.5-4.5z%27 fill=%27white%27/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f5f6fb;
-    --surface: #ffffff;
-    --surface-2: #eef0f8;
-    --border: #e1e4ef;
-    --text: #131625;
-    --muted: #666d85;
-    --accent: #2f6fed;
-    --accent-strong: #2158c7;
-    --accent-soft: #e6eeff;
-    --accent-text: #1d4fb8;
-    --success: #1a9c5c;
-    --success-soft: #e4f7ec;
-    --warn: #c7790c;
-    --warn-soft: #fff3df;
-    --danger: #d43c3c;
-    --danger-soft: #ffe9e9;
-    --ring: rgba(47, 111, 237, .32);
-    --shadow: 0 1px 2px rgba(19, 22, 37, .04), 0 12px 32px -16px rgba(19, 22, 37, .22);
-    --radius: 18px;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #0b0d16;
-      --surface: #131625;
-      --surface-2: #1a1e30;
-      --border: #272c44;
-      --text: #ecEEf8;
-      --muted: #9aa2bd;
-      --accent: #6f9cff;
-      --accent-strong: #8db1ff;
-      --accent-soft: #1b2745;
-      --accent-text: #a9c2ff;
-      --success: #3fd58a;
-      --success-soft: #11301f;
-      --warn: #f0a640;
-      --warn-soft: #33260f;
-      --danger: #ff6d6d;
-      --danger-soft: #3a1717;
-      --ring: rgba(111, 156, 255, .4);
-      --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 14px 36px -16px rgba(0, 0, 0, .8);
-    }
+    --bg: #f6f3fb;
+    --surface: rgba(255, 255, 255, 0.82);
+    --surface-solid: #ffffff;
+    --surface-2: #f3eff9;
+    --border: #e6e0f0;
+    --text: #221d33;
+    --muted: #6d6782;
+    --violet: #6a55c9;
+    --violet-strong: #5642b0;
+    --violet-soft: #ece7fb;
+    --violet-text: #4a3999;
+    --coral: #d3785f;
+    --coral-soft: #fbeae3;
+    --teal: #2f8f84;
+    --teal-soft: #e0f1ee;
+    --amber: #b57b1e;
+    --amber-soft: #f8eed9;
+    --rose: #bf4f63;
+    --rose-soft: #f9e4e8;
+    --ring: rgba(106, 85, 201, 0.28);
+    --shadow: 0 1px 2px rgba(34, 29, 51, 0.04), 0 18px 40px -22px rgba(74, 57, 153, 0.35);
+    --radius: 20px;
   }
   *, *::before, *::after { box-sizing: border-box; }
   html { -webkit-text-size-adjust: 100%; }
   body {
     margin: 0;
-    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    background: radial-gradient(1100px 500px at 50% -180px, var(--accent-soft), transparent 70%), var(--bg);
+    min-height: 100vh;
+    font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     color: var(--text);
     line-height: 1.55;
     -webkit-font-smoothing: antialiased;
+    background: var(--bg);
   }
-  a { color: var(--accent-text); }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(760px 520px at 8% -8%, #e6defb 0%, transparent 62%),
+      radial-gradient(680px 460px at 100% 4%, #fbe2d7 0%, transparent 60%),
+      radial-gradient(820px 560px at 70% 108%, #d9efe8 0%, transparent 62%),
+      radial-gradient(600px 420px at -6% 92%, #f6e3ee 0%, transparent 60%),
+      var(--bg);
+  }
+  a { color: var(--violet-text); }
   button { font: inherit; }
-  .wrap { max-width: 880px; margin: 0 auto; padding: 32px 16px 64px; }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 28px 16px 64px; }
 
   /* Header */
-  .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 36px; }
-  .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; letter-spacing: -.01em; }
-  .brand .logo { width: 32px; height: 32px; border-radius: 10px; background: linear-gradient(135deg, var(--accent), #7c4dff); display: grid; place-items: center; color: #fff; font-size: 15px; }
-  .pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid var(--border); background: var(--surface); border-radius: 999px; font-size: 12px; color: var(--muted); }
-  .pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
-  .pill.ok .dot { background: var(--success); }
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 40px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: -.01em; }
+  .brand .logo { width: 34px; height: 34px; border-radius: 11px; background: linear-gradient(135deg, var(--violet) 0%, #9b6fc4 55%, var(--coral) 100%); display: grid; place-items: center; color: #fff; font-size: 15px; box-shadow: 0 6px 16px -6px rgba(106, 85, 201, .55); }
+  .pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid var(--border); background: var(--surface); backdrop-filter: blur(10px); border-radius: 999px; font-size: 12px; color: var(--muted); font-weight: 500; }
+  .pill .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--amber); animation: pulse 1.4s ease-in-out infinite; }
+  .pill.ok .dot { background: var(--teal); animation: none; }
+  .pill.down .dot { background: var(--rose); animation: none; }
+  @keyframes pulse { 50% { opacity: .35; } }
 
-  .hero { text-align: center; margin-bottom: 28px; }
-  .hero h1 { font-size: clamp(30px, 5vw, 44px); line-height: 1.1; letter-spacing: -.03em; margin: 0 0 12px; font-weight: 700; }
-  .hero h1 span { color: var(--accent); }
-  .hero p { margin: 0 auto; max-width: 540px; color: var(--muted); font-size: 15px; }
+  .hero { text-align: center; margin-bottom: 30px; }
+  .eyebrow { display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--violet-text); background: var(--violet-soft); padding: 5px 12px; border-radius: 999px; margin-bottom: 14px; }
+  .hero h1 { font-size: clamp(30px, 5.2vw, 46px); line-height: 1.08; letter-spacing: -.035em; margin: 0 0 14px; font-weight: 800; }
+  .hero h1 span { background: linear-gradient(95deg, var(--violet) 0%, #a0619e 50%, var(--coral) 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .hero p { margin: 0 auto; max-width: 560px; color: var(--muted); font-size: 15.5px; }
+  .perks { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  .perk { font-size: 12.5px; font-weight: 500; padding: 5px 11px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); color: var(--muted); }
 
   /* Cards */
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; margin-bottom: 14px; }
-  .card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
-  .step { display: inline-flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15px; }
-  .step .n { width: 24px; height: 24px; border-radius: 50%; background: var(--accent-soft); color: var(--accent-text); display: grid; place-items: center; font-size: 12px; font-weight: 700; }
+  .card { background: var(--surface); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 22px; margin-bottom: 16px; }
+  .card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+  .step { display: inline-flex; align-items: center; gap: 10px; font-weight: 700; font-size: 15.5px; }
+  .step .n { width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(135deg, var(--violet), #9b6fc4); color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 700; }
   .hint { font-size: 12.5px; color: var(--muted); }
-  label.lbl { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
-  .field { width: 100%; padding: 11px 13px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2); color: var(--text); font: inherit; font-size: 14px; transition: border-color .15s, box-shadow .15s; }
-  .field:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px var(--ring); background: var(--surface); }
+  label.lbl { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+  .field { width: 100%; padding: 11px 13px; border: 1px solid var(--border); border-radius: 13px; background: var(--surface-solid); color: var(--text); font: inherit; font-size: 14px; transition: border-color .15s, box-shadow .15s; }
+  .field:focus { outline: none; border-color: var(--violet); box-shadow: 0 0 0 4px var(--ring); }
   textarea.field { min-height: 130px; resize: vertical; line-height: 1.5; }
   .row { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; }
   @media (max-width: 640px) { .row { grid-template-columns: 1fr; } }
 
-  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 16px; border-radius: 12px; border: 1px solid transparent; cursor: pointer; font-weight: 500; font-size: 14px; transition: background .15s, border-color .15s, opacity .15s, transform .1s; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 16px; border-radius: 13px; border: 1px solid transparent; cursor: pointer; font-weight: 600; font-size: 14px; transition: background .15s, border-color .15s, opacity .15s, transform .1s, box-shadow .15s; }
   .btn:active { transform: translateY(1px); }
   .btn:focus-visible { outline: none; box-shadow: 0 0 0 4px var(--ring); }
-  .btn-primary { background: var(--accent); color: #fff; }
-  .btn-primary:hover { background: var(--accent-strong); }
-  .btn-ghost { background: var(--surface); border-color: var(--border); color: var(--text); }
-  .btn-ghost:hover { border-color: var(--accent); color: var(--accent-text); }
-  .btn-sm { padding: 6px 11px; font-size: 12.5px; border-radius: 9px; }
-  .btn[disabled] { opacity: .5; cursor: not-allowed; }
-  .btn-big { width: 100%; padding: 14px 18px; font-size: 15px; border-radius: 14px; }
+  .btn-primary { background: linear-gradient(135deg, var(--violet) 0%, #8a5fbf 100%); color: #fff; box-shadow: 0 10px 22px -12px rgba(106, 85, 201, .7); }
+  .btn-primary:hover { background: linear-gradient(135deg, var(--violet-strong) 0%, #7a50ad 100%); }
+  .btn-ghost { background: var(--surface-solid); border-color: var(--border); color: var(--text); }
+  .btn-ghost:hover { border-color: var(--violet); color: var(--violet-text); }
+  .btn-sm { padding: 6px 11px; font-size: 12.5px; border-radius: 10px; }
+  .btn[disabled] { opacity: .55; cursor: not-allowed; }
+  .btn-big { width: 100%; padding: 15px 18px; font-size: 15.5px; border-radius: 15px; }
 
-  /* Key section */
-  .key-row { display: flex; gap: 8px; }
-  .key-row .field { flex: 1; }
-  .status { font-size: 12.5px; margin-top: 8px; display: flex; align-items: center; gap: 6px; }
-  .status.ok { color: var(--success); }
-  .status.err { color: var(--danger); }
-  details summary { cursor: pointer; list-style: none; }
-  details summary::-webkit-details-marker { display: none; }
-  .chev { transition: transform .2s; display: inline-block; }
-  details[open] .chev { transform: rotate(90deg); }
-
-  /* Tabs (input + results) */
-  .tabs { display: flex; gap: 4px; padding: 4px; background: var(--surface-2); border-radius: 12px; width: fit-content; max-width: 100%; overflow-x: auto; }
-  .tab { padding: 7px 14px; border-radius: 9px; border: none; background: transparent; color: var(--muted); font-weight: 500; font-size: 13px; cursor: pointer; white-space: nowrap; }
-  .tab.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
-  .tab .badge { margin-left: 6px; font-size: 11px; padding: 1px 6px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-text); }
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; padding: 4px; background: var(--surface-2); border-radius: 13px; width: fit-content; max-width: 100%; overflow-x: auto; }
+  .tab { padding: 7px 14px; border-radius: 10px; border: none; background: transparent; color: var(--muted); font-weight: 600; font-size: 13px; cursor: pointer; white-space: nowrap; }
+  .tab.active { background: var(--surface-solid); color: var(--violet-text); box-shadow: 0 1px 3px rgba(74, 57, 153, .15); }
   .panel { display: none; }
   .panel.active { display: block; }
 
   /* Dropzone */
-  .drop { border: 1.5px dashed var(--border); border-radius: 14px; padding: 28px 16px; text-align: center; background: var(--surface-2); transition: border-color .15s, background .15s; cursor: pointer; }
-  .drop.over, .drop:hover { border-color: var(--accent); background: var(--accent-soft); }
-  .drop .ico { font-size: 28px; margin-bottom: 6px; }
-  .drop strong { display: block; font-size: 14px; }
+  .drop { border: 1.5px dashed #cfc5e6; border-radius: 16px; padding: 30px 16px; text-align: center; background: linear-gradient(135deg, rgba(236, 231, 251, .6), rgba(251, 234, 227, .5)); transition: border-color .15s, background .15s; cursor: pointer; }
+  .drop.over, .drop:hover { border-color: var(--violet); background: linear-gradient(135deg, rgba(236, 231, 251, .95), rgba(251, 234, 227, .8)); }
+  .drop .ico { font-size: 30px; margin-bottom: 6px; }
+  .drop strong { display: block; font-size: 14.5px; }
   .drop span { font-size: 12.5px; color: var(--muted); }
-  .file-ok { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: var(--success-soft); color: var(--success); font-size: 13px; }
-  .file-ok .btn { color: var(--success); }
+  .file-ok { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; padding: 10px 12px; border-radius: 13px; background: var(--teal-soft); color: var(--teal); font-size: 13px; font-weight: 500; }
 
-  /* Alerts */
-  .alert { padding: 12px 14px; border-radius: 12px; font-size: 13.5px; margin: 10px 0 0; display: none; }
+  .alert { padding: 12px 14px; border-radius: 13px; font-size: 13.5px; margin: 12px 0 0; display: none; }
   .alert.show { display: block; }
-  .alert.err { background: var(--danger-soft); color: var(--danger); }
+  .alert.err { background: var(--rose-soft); color: var(--rose); }
+  .alert.info { background: var(--violet-soft); color: var(--violet-text); }
 
   /* Results */
   .results { display: none; }
   .results.show { display: block; }
   .scores { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
-  .score { padding: 16px 12px; border-radius: 14px; background: var(--surface-2); text-align: center; }
-  .ring { width: 92px; height: 92px; margin: 0 auto 8px; position: relative; }
+  .score { padding: 16px 12px; border-radius: 16px; text-align: center; background: var(--surface-solid); border: 1px solid var(--border); }
+  .ring { width: 94px; height: 94px; margin: 0 auto 8px; position: relative; }
   .ring svg { transform: rotate(-90deg); }
-  .ring circle.track { stroke: var(--border); }
-  .ring circle.val { stroke: var(--accent); stroke-linecap: round; transition: stroke-dashoffset 1s cubic-bezier(.2,.8,.2,1); }
-  .ring.good circle.val { stroke: var(--success); }
-  .ring.mid circle.val { stroke: var(--warn); }
-  .ring.low circle.val { stroke: var(--danger); }
-  .ring .num { position: absolute; inset: 0; display: grid; place-items: center; font-weight: 700; font-size: 20px; letter-spacing: -.02em; }
-  .score .lbl { font-size: 12.5px; color: var(--muted); font-weight: 500; }
-  .sec { margin-top: 18px; }
-  .sec h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--accent-text); margin: 0 0 8px; font-weight: 600; }
+  .ring circle.track { stroke: var(--surface-2); }
+  .ring circle.val { stroke: var(--violet); stroke-linecap: round; transition: stroke-dashoffset 1s cubic-bezier(.2,.8,.2,1); }
+  .ring.good circle.val { stroke: var(--teal); }
+  .ring.mid circle.val { stroke: var(--amber); }
+  .ring.low circle.val { stroke: var(--rose); }
+  .ring .num { position: absolute; inset: 0; display: grid; place-items: center; font-weight: 800; font-size: 21px; letter-spacing: -.02em; }
+  .score .lbl { font-size: 12.5px; color: var(--muted); font-weight: 600; }
+  .sec { margin-top: 20px; }
+  .sec h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .09em; color: var(--violet-text); margin: 0 0 9px; font-weight: 700; }
   .sec p { margin: 0; font-size: 14.5px; }
   .list { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
-  .list li { display: flex; gap: 10px; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); font-size: 14px; }
-  .list li::before { content: ""; width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex: none; background: var(--accent); }
-  .list.good li::before { background: var(--success); }
-  .list.warn li::before { background: var(--warn); }
+  .list li { display: flex; gap: 10px; padding: 11px 13px; border-radius: 13px; background: var(--surface-solid); border: 1px solid var(--border); font-size: 14px; }
+  .list li::before { content: ""; width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex: none; background: var(--violet); }
+  .list.good li { border-left: 3px solid var(--teal); }
+  .list.good li::before { background: var(--teal); }
+  .list.warn li { border-left: 3px solid var(--amber); }
+  .list.warn li::before { background: var(--amber); }
   .chips { display: flex; flex-wrap: wrap; gap: 6px; }
-  .chip { font-size: 12.5px; padding: 4px 10px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); }
-  .chip.good { background: var(--success-soft); color: var(--success); border-color: transparent; }
-  .chip.warn { background: var(--warn-soft); color: var(--warn); border-color: transparent; }
-  .verdict { padding: 14px 16px; border-radius: 14px; background: var(--accent-soft); color: var(--accent-text); font-size: 14.5px; }
-  .rw { padding: 14px; border-radius: 14px; background: var(--surface-2); margin-bottom: 10px; }
-  .rw .tag { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
-  .rw .after { border-left: 3px solid var(--success); padding-left: 12px; margin-top: 10px; }
-  .rw .after .tag { color: var(--success); }
+  .chip { font-size: 12.5px; font-weight: 500; padding: 4px 11px; border-radius: 999px; background: var(--violet-soft); color: var(--violet-text); }
+  .chip.good { background: var(--teal-soft); color: var(--teal); }
+  .chip.warn { background: var(--amber-soft); color: var(--amber); }
+  .verdict { padding: 15px 17px; border-radius: 16px; background: linear-gradient(135deg, var(--violet-soft), var(--coral-soft)); color: var(--violet-text); font-size: 14.5px; font-weight: 500; }
+  .rw { padding: 15px; border-radius: 16px; background: var(--surface-solid); border: 1px solid var(--border); margin-bottom: 10px; }
+  .rw .tag { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; color: var(--muted); margin-bottom: 4px; }
+  .rw .after { border-left: 3px solid var(--teal); padding-left: 12px; margin-top: 10px; }
+  .rw .after .tag { color: var(--teal); }
   .rw p { margin: 0; font-size: 14px; }
-  .letter { white-space: pre-wrap; font-size: 14.5px; line-height: 1.75; padding: 20px; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--border); }
+  .letter { white-space: pre-wrap; font-size: 14.5px; line-height: 1.8; padding: 22px; border-radius: 16px; background: var(--surface-solid); border: 1px solid var(--border); }
   .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
-  .empty { color: var(--muted); font-size: 14px; padding: 24px; text-align: center; background: var(--surface-2); border-radius: 14px; }
+  .empty { color: var(--muted); font-size: 14px; padding: 26px; text-align: center; background: var(--surface-solid); border: 1px dashed var(--border); border-radius: 16px; }
 
-  /* Skeleton */
   @keyframes shimmer { from { background-position: -600px 0; } to { background-position: 600px 0; } }
-  .sk { border-radius: 8px; height: 14px; margin-bottom: 10px; background: linear-gradient(90deg, var(--surface-2) 25%, var(--border) 50%, var(--surface-2) 75%); background-size: 1200px 100%; animation: shimmer 1.4s linear infinite; }
-  .sk.w60 { width: 60%; } .sk.w80 { width: 80%; } .sk.w40 { width: 40%; } .sk.tall { height: 90px; }
+  .sk { border-radius: 9px; height: 14px; margin-bottom: 10px; background: linear-gradient(90deg, #efeaf7 25%, #e3dbf1 50%, #efeaf7 75%); background-size: 1200px 100%; animation: shimmer 1.4s linear infinite; }
+  .sk.w60 { width: 60%; } .sk.w80 { width: 80%; } .sk.tall { height: 94px; border-radius: 16px; }
   @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-  .rise { animation: rise .35s ease both; }
-  .spin { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; animation: rot .8s linear infinite; }
+  .rise { animation: rise .4s ease both; }
+  .spin { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255,255,255,.45); border-top-color: #fff; animation: rot .8s linear infinite; }
   @keyframes rot { to { transform: rotate(360deg); } }
 
   footer { text-align: center; color: var(--muted); font-size: 12.5px; margin-top: 40px; }
@@ -190,39 +180,20 @@
 
   <div class="top">
     <div class="brand"><div class="logo">✦</div> Resume Analyzer</div>
-    <div class="pill" id="keyPill"><span class="dot"></span><span id="keyPillText">No API key</span></div>
+    <div class="pill" id="serverPill"><span class="dot"></span><span id="serverText">Connecting to AI…</span></div>
   </div>
 
   <section class="hero rise">
+    <span class="eyebrow">Free · No sign-up · No API key</span>
     <h1>Know what a recruiter sees<br><span>before they do.</span></h1>
-    <p>Upload your resume and get an ATS score, honest strengths and gaps, a match against any job ad, rewritten bullets and a cover letter — in about 20 seconds.</p>
+    <p>Upload your resume for an ATS score, honest strengths and gaps, a match against any job ad, stronger bullet points and a tailored cover letter.</p>
+    <div class="perks"><span class="perk">📄 PDF or text</span><span class="perk">🎯 Job-ad matching</span><span class="perk">✍️ Bullet rewrites</span><span class="perk">✉️ Cover letter</span></div>
   </section>
 
-  <!-- Step 1: key -->
-  <section class="card rise">
-    <details id="keyBox" open>
-      <summary>
-        <div class="card-head" style="margin:0">
-          <div class="step"><span class="n">1</span> Connect Google Gemini <span class="chev">›</span></div>
-          <span class="hint">Free key · stays in this browser only</span>
-        </div>
-      </summary>
-      <div style="margin-top:14px">
-        <p class="hint" style="margin:0 0 10px">Get a free key at <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">aistudio.google.com</a>. It is stored in your browser's localStorage and sent only to Google's API — never to any other server.</p>
-        <div class="key-row">
-          <input class="field" type="password" id="apiKey" placeholder="Paste your Gemini API key" autocomplete="off" spellcheck="false">
-          <button class="btn btn-primary" id="saveKeyBtn" type="button">Save</button>
-          <button class="btn btn-ghost" id="clearKeyBtn" type="button">Clear</button>
-        </div>
-        <div class="status" id="keyStatus"></div>
-      </div>
-    </details>
-  </section>
-
-  <!-- Step 2: resume -->
+  <!-- Step 1: resume -->
   <section class="card rise">
     <div class="card-head">
-      <div class="step"><span class="n">2</span> Your resume</div>
+      <div class="step"><span class="n">1</span> Your resume</div>
       <div class="tabs" role="tablist">
         <button class="tab active" data-in="upload" type="button">Upload PDF</button>
         <button class="tab" data-in="paste" type="button">Paste text</button>
@@ -232,7 +203,7 @@
       <div class="drop" id="drop" tabindex="0" role="button" aria-label="Upload a PDF resume">
         <div class="ico">📄</div>
         <strong>Drop your PDF here or click to choose</strong>
-        <span>Text is extracted locally in your browser</span>
+        <span>Text is extracted in your browser</span>
         <input type="file" id="file" accept="application/pdf,.pdf,.txt" class="sr-only">
       </div>
       <div class="file-ok" id="fileOk" style="display:none">
@@ -246,29 +217,30 @@
     <div class="hint" id="resumeMeta" style="margin-top:8px"></div>
   </section>
 
-  <!-- Step 3: target -->
+  <!-- Step 2: target -->
   <section class="card rise">
     <div class="card-head">
-      <div class="step"><span class="n">3</span> Target role</div>
-      <span class="hint">Job description unlocks the match score</span>
+      <div class="step"><span class="n">2</span> Target role</div>
+      <span class="hint">A job description unlocks the match score</span>
     </div>
     <div class="row">
       <div>
         <label class="lbl" for="jobTitle">Job title</label>
-        <input class="field" id="jobTitle" placeholder="e.g. Full Stack Developer">
+        <input class="field" id="jobTitle" placeholder="e.g. Full Stack Developer" maxlength="120">
       </div>
       <div>
         <label class="lbl" for="company">Company (optional)</label>
-        <input class="field" id="company" placeholder="e.g. Atlassian">
+        <input class="field" id="company" placeholder="e.g. Atlassian" maxlength="120">
       </div>
     </div>
     <div style="margin-top:12px">
       <label class="lbl" for="jobDescription">Job description (optional, recommended)</label>
       <textarea class="field" id="jobDescription" placeholder="Paste the job ad here to get keyword matching and a tailored cover letter…"></textarea>
     </div>
-    <div style="margin-top:14px">
+    <div style="margin-top:16px">
       <button class="btn btn-primary btn-big" id="analyzeBtn" type="button"><span id="analyzeLabel">Analyze my resume</span></button>
     </div>
+    <div class="alert info" id="slowMsg">The AI server runs on free hosting and may be waking up — the first analysis can take up to a minute.</div>
     <div class="alert err" id="errorMsg" role="alert"></div>
   </section>
 
@@ -292,12 +264,12 @@
   </section>
 
   <footer>
-    Built by <a href="https://jyothsnaperuri.github.io/Jyothsna-portfolio/" target="_blank" rel="noopener">Jyothsna (Jo) Peruri</a> · Google Gemini · pdf.js · <a href="https://github.com/jyothsnaPeruri/ai-resume-analyzer" target="_blank" rel="noopener">Source</a>
+    Built by <a href="https://jyothsnaperuri.github.io/Jyothsna-portfolio/" target="_blank" rel="noopener">Jyothsna (Jo) Peruri</a> · FastAPI · Groq · pdf.js · <a href="https://github.com/jyothsnaPeruri/ai-resume-analyzer" target="_blank" rel="noopener">Source</a>
   </footer>
 </div>
 
 <script type="module">
-  // pdf.js is loaded as a module and exposed for the main script. If the CDN fails, paste-text still works.
+  // pdf.js loads as a module; if the CDN fails, paste-text still works.
   try {
     const pdfjs = await import("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs");
     pdfjs.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";
@@ -311,10 +283,11 @@
 (function () {
   "use strict";
   var $ = function (id) { return document.getElementById(id); };
-  var GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
-  var KEY_STORAGE = "gemini_api_key";
-  var key = "";
+  // FastAPI backend (Render). The AI key lives on the server, so visitors never need one.
+  var API_BASE = "https://research-agent-backend-olvv.onrender.com";
   var resumeFromFile = "";
+  var job = null;          // inputs of the current analysis
+  var loaded = {};         // task -> "loading" | "done" for the current analysis
 
   /* ---------- helpers ---------- */
   function esc(s) {
@@ -322,26 +295,18 @@
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
     });
   }
-  function parseJSON(text) {
-    var t = String(text || "").replace(/```json/gi, "").replace(/```/g, "").trim();
-    var a = t.indexOf("{"), b = t.lastIndexOf("}");
-    if (a === -1 || b === -1) throw new Error("No JSON in response");
-    return JSON.parse(t.slice(a, b + 1));
-  }
   function clamp(n) { n = Number(n); return isNaN(n) ? 0 : Math.max(0, Math.min(100, Math.round(n))); }
   function ringClass(n) { return n >= 75 ? "good" : n >= 50 ? "mid" : "low"; }
   function ring(label, value, suffix) {
     var v = clamp(value), r = 40, c = 2 * Math.PI * r;
     return '<div class="score"><div class="ring ' + ringClass(v) + '">' +
-      '<svg width="92" height="92" viewBox="0 0 92 92"><circle class="track" cx="46" cy="46" r="' + r + '" fill="none" stroke-width="8"/>' +
-      '<circle class="val" cx="46" cy="46" r="' + r + '" fill="none" stroke-width="8" stroke-dasharray="' + c + '" stroke-dashoffset="' + c + '" data-target="' + (c * (1 - v / 100)) + '"/></svg>' +
+      '<svg width="94" height="94" viewBox="0 0 94 94"><circle class="track" cx="47" cy="47" r="' + r + '" fill="none" stroke-width="8"/>' +
+      '<circle class="val" cx="47" cy="47" r="' + r + '" fill="none" stroke-width="8" stroke-dasharray="' + c + '" stroke-dashoffset="' + c + '" data-target="' + (c * (1 - v / 100)) + '"/></svg>' +
       '<div class="num">' + v + (suffix || "") + '</div></div><div class="lbl">' + esc(label) + '</div></div>';
   }
-  function animateRings(container) {
+  function animateRings(el) {
     requestAnimationFrame(function () {
-      container.querySelectorAll("circle.val[data-target]").forEach(function (c) {
-        c.style.strokeDashoffset = c.getAttribute("data-target");
-      });
+      el.querySelectorAll("circle.val[data-target]").forEach(function (c) { c.style.strokeDashoffset = c.getAttribute("data-target"); });
     });
   }
   function list(items, cls) {
@@ -372,31 +337,17 @@
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
   }
 
-  /* ---------- API key ---------- */
-  function setKeyUI(saved) {
-    var pill = $("keyPill");
-    pill.classList.toggle("ok", saved);
-    $("keyPillText").textContent = saved ? "Gemini connected" : "No API key";
-    if (saved) $("keyBox").removeAttribute("open");
+  /* ---------- wake the free-tier server as soon as the page opens ---------- */
+  function setServer(state) {
+    var pill = $("serverPill");
+    pill.classList.toggle("ok", state === "ok");
+    pill.classList.toggle("down", state === "down");
+    $("serverText").textContent = state === "ok" ? "AI ready" : state === "down" ? "AI unreachable" : "Waking the AI…";
   }
-  key = localStorage.getItem(KEY_STORAGE) || "";
-  if (key) {
-    $("apiKey").value = key;
-    $("keyStatus").className = "status ok"; $("keyStatus").textContent = "✓ Key loaded from this browser";
-    setKeyUI(true);
-  }
-  $("saveKeyBtn").addEventListener("click", function () {
-    var k = $("apiKey").value.trim();
-    if (!k) { $("keyStatus").className = "status err"; $("keyStatus").textContent = "Paste a key first."; return; }
-    key = k; localStorage.setItem(KEY_STORAGE, k);
-    $("keyStatus").className = "status ok"; $("keyStatus").textContent = "✓ Saved in this browser";
-    setKeyUI(true);
-  });
-  $("clearKeyBtn").addEventListener("click", function () {
-    key = ""; localStorage.removeItem(KEY_STORAGE); $("apiKey").value = "";
-    $("keyStatus").className = "status"; $("keyStatus").textContent = "Key removed.";
-    setKeyUI(false);
-  });
+  setServer("waking");
+  fetch(API_BASE + "/", { cache: "no-store" })
+    .then(function (r) { setServer(r.ok ? "ok" : "down"); })
+    .catch(function () { setServer("down"); });
 
   /* ---------- input tabs ---------- */
   document.querySelectorAll(".tab[data-in]").forEach(function (t) {
@@ -422,20 +373,17 @@
 
   async function extractPdf(file) {
     if (!window.pdfjsLib) throw new Error("PDF reader is still loading (or blocked). Try again in a moment, or paste the text instead.");
-    var buf = await file.arrayBuffer();
-    var pdf = await window.pdfjsLib.getDocument({ data: buf }).promise;
+    var pdf = await window.pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
     var out = [];
     for (var p = 1; p <= pdf.numPages; p++) {
-      var page = await pdf.getPage(p);
-      var content = await page.getTextContent();
+      var content = await (await pdf.getPage(p)).getTextContent();
       var lastY = null, line = [];
       content.items.forEach(function (it) {
         var y = Math.round(it.transform[5]);
         if (lastY !== null && Math.abs(y - lastY) > 2) { out.push(line.join(" ")); line = []; }
         line.push(it.str); lastY = y;
       });
-      out.push(line.join(" "));
-      out.push("");
+      out.push(line.join(" "), "");
     }
     return out.join("\n").replace(/[ \t]+/g, " ").replace(/\n{3,}/g, "\n\n").trim();
   }
@@ -446,7 +394,7 @@
       var text = /\.txt$/i.test(file.name) ? await file.text() : await extractPdf(file);
       if (text.length < 50) throw new Error("Couldn't read much text from that file. If it's a scanned image, paste the text instead.");
       resumeFromFile = text;
-      $("fileName").textContent = file.name + " · " + text.split(/\s+/).length + " words";
+      $("fileName").textContent = "✓ " + file.name + " · " + text.split(/\s+/).length + " words";
       $("fileOk").style.display = "flex";
       $("resumeMeta").textContent = "";
     } catch (err) {
@@ -459,105 +407,127 @@
     return (pasteActive ? $("resumeText").value : resumeFromFile).trim();
   }
 
-  /* ---------- results tabs ---------- */
-  function switchTab(name) {
-    document.querySelectorAll("#resultTabs .tab").forEach(function (b) { b.classList.toggle("active", b.dataset.tab === name); });
-    ["analysis", "match", "rewrite", "cover"].forEach(function (id) { $(id).classList.toggle("active", id === name); });
-  }
-  document.querySelectorAll("#resultTabs .tab").forEach(function (b) { b.addEventListener("click", function () { switchTab(b.dataset.tab); }); });
-
-  /* ---------- Gemini ---------- */
-  async function gemini(prompt, maxTokens) {
-    var res = await fetch(GEMINI_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-goog-api-key": key },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.3, maxOutputTokens: maxTokens || 1200, responseMimeType: "application/json" }
-      })
-    });
-    var data = await res.json();
-    if (data.error) throw new Error(data.error.message || "Gemini request failed");
-    var parts = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts;
-    if (!parts || !parts.length) throw new Error("Gemini returned an empty response — try again.");
-    return parts.map(function (p) { return p.text || ""; }).join("");
+  /* ---------- API ---------- */
+  async function callApi(task) {
+    var slow = setTimeout(function () { $("slowMsg").classList.add("show"); }, 8000);
+    try {
+      var res = await fetch(API_BASE + "/resume/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ task: task, resume: job.resume, job_title: job.title, company: job.company, job_description: job.jd })
+      });
+      var data = await res.json().catch(function () { return {}; });
+      setServer("ok");
+      if (!res.ok) {
+        var detail = typeof data.detail === "string" ? data.detail : "Something went wrong — please try again.";
+        throw new Error(detail);
+      }
+      return data;
+    } catch (e) {
+      if (e instanceof TypeError) { setServer("down"); throw new Error("Couldn't reach the AI server. Please try again in a moment."); }
+      throw e;
+    } finally {
+      clearTimeout(slow);
+      $("slowMsg").classList.remove("show");
+    }
   }
 
   /* ---------- renderers ---------- */
-  function renderAnalysis(d) {
-    var h = '<div class="scores">' + ring("Overall", d.score) + ring("ATS friendliness", d.ats_score) + ring("Impact", d.impact) + "</div>";
-    h += '<div class="sec"><h3>Summary</h3><p>' + esc(d.summary) + "</p></div>";
-    if (d.skills && d.skills.length) h += '<div class="sec"><h3>Skills detected</h3>' + chips(d.skills, "") + "</div>";
-    h += '<div class="sec"><h3>Strengths</h3>' + list(d.strengths, "good") + "</div>";
-    h += '<div class="sec"><h3>Improve next</h3>' + list(d.improvements, "warn") + "</div>";
-    $("analysis").innerHTML = h; animateRings($("analysis"));
+  var render = {
+    analysis: function (d) {
+      var h = '<div class="scores">' + ring("Overall", d.score) + ring("ATS friendliness", d.ats_score) + ring("Impact", d.impact) + "</div>";
+      h += '<div class="sec"><h3>Summary</h3><p>' + esc(d.summary) + "</p></div>";
+      if (d.skills && d.skills.length) h += '<div class="sec"><h3>Skills detected</h3>' + chips(d.skills, "") + "</div>";
+      h += '<div class="sec"><h3>Strengths</h3>' + list(d.strengths, "good") + "</div>";
+      h += '<div class="sec"><h3>Improve next</h3>' + list(d.improvements, "warn") + "</div>";
+      $("analysis").innerHTML = h; animateRings($("analysis"));
+    },
+    match: function (d) {
+      var h = '<div class="scores" style="grid-template-columns:150px 1fr;align-items:center">' + ring("Match", d.match_score, "%") + '<div class="verdict">' + esc(d.verdict) + "</div></div>";
+      h += '<div class="sec"><h3>Matched keywords · ' + (d.matched_keywords || []).length + "</h3>" + chips(d.matched_keywords, "good") + "</div>";
+      h += '<div class="sec"><h3>Missing keywords · ' + (d.missing || []).length + "</h3>" + chips(d.missing, "warn") + '<p class="hint" style="margin-top:8px">Add the missing ones you genuinely have — in Skills and in a bullet where you used them.</p></div>';
+      if (d.tips && d.tips.length) h += '<div class="sec"><h3>How to tailor</h3>' + list(d.tips, "") + "</div>";
+      $("match").innerHTML = h; animateRings($("match"));
+    },
+    rewrite: function (d) {
+      var items = d.bullets || [];
+      if (!items.length) { $("rewrite").innerHTML = '<div class="empty">No bullets to rewrite.</div>'; return; }
+      var h = items.map(function (b) {
+        return '<div class="rw"><div class="tag">Before</div><p>' + esc(b.original) + '</p><div class="after"><div class="tag">After</div><p>' + esc(b.rewritten) + "</p>" +
+          (b.why ? '<p class="hint" style="margin-top:6px">' + esc(b.why) + "</p>" : "") + "</div></div>";
+      }).join("");
+      h += '<div class="actions"><button class="btn btn-ghost btn-sm" type="button" id="copyRw">Copy all rewrites</button></div>';
+      $("rewrite").innerHTML = h;
+      $("copyRw").addEventListener("click", function () { copyText(items.map(function (b) { return "• " + b.rewritten; }).join("\n"), this); });
+    },
+    cover: function (d) {
+      var letter = String(d.letter || "").trim();
+      $("cover").innerHTML = '<div class="letter">' + esc(letter) + '</div><div class="actions"><button class="btn btn-primary btn-sm" type="button" id="copyCover">Copy letter</button><button class="btn btn-ghost btn-sm" type="button" id="dlCover">Download .txt</button></div>';
+      $("copyCover").addEventListener("click", function () { copyText(letter, this); });
+      $("dlCover").addEventListener("click", function () { download("cover-letter.txt", letter); });
+    }
+  };
+
+  function renderFail(task, err) {
+    $(task).innerHTML = '<div class="alert err show">' + esc(err && err.message ? err.message : "This part failed.") +
+      '</div><div class="actions"><button class="btn btn-ghost btn-sm" type="button" data-retry="' + task + '">Try again</button></div>';
+    $(task).querySelector("[data-retry]").addEventListener("click", function () { delete loaded[task]; load(task); });
   }
-  function renderMatch(d) {
-    var h = '<div class="scores" style="grid-template-columns:150px 1fr;align-items:center">' + ring("Match", d.match_score, "%") +
-      '<div class="verdict">' + esc(d.verdict) + "</div></div>";
-    h += '<div class="sec"><h3>Matched keywords · ' + (d.matched_keywords || []).length + "</h3>" + chips(d.matched_keywords, "good") + "</div>";
-    h += '<div class="sec"><h3>Missing keywords · ' + (d.missing || []).length + "</h3>" + chips(d.missing, "warn") + '<p class="hint" style="margin-top:8px">Add the missing ones you genuinely have — in Skills and in a bullet where you used them.</p></div>';
-    if (d.tips && d.tips.length) h += '<div class="sec"><h3>How to tailor</h3>' + list(d.tips, "") + "</div>";
-    $("match").innerHTML = h; animateRings($("match"));
+
+  // Each tab is generated the first time it's opened, to keep AI usage (and waiting) down.
+  async function load(task) {
+    if (!job || loaded[task]) return;
+    if (task === "match" && !job.jd) {
+      $("match").innerHTML = '<div class="empty">Paste a job description in step 2 and analyze again to get a keyword match.</div>';
+      loaded[task] = "done"; return;
+    }
+    loaded[task] = "loading";
+    var myJob = job;
+    $(task).innerHTML = task === "analysis"
+      ? '<div class="scores"><div class="sk tall"></div><div class="sk tall"></div><div class="sk tall"></div></div>' + skeleton(5)
+      : skeleton(task === "cover" ? 8 : 6);
+    try {
+      var data = await callApi(task);
+      if (myJob !== job) return;   // a newer analysis started meanwhile
+      render[task](data);
+      loaded[task] = "done";
+    } catch (e) {
+      if (myJob !== job) return;
+      renderFail(task, e);
+      delete loaded[task];
+    }
   }
-  function renderRewrite(d) {
-    var items = d.bullets || [];
-    if (!items.length) { $("rewrite").innerHTML = '<div class="empty">No bullets to rewrite.</div>'; return; }
-    var h = items.map(function (b) {
-      return '<div class="rw"><div class="tag">Before</div><p>' + esc(b.original) + '</p><div class="after"><div class="tag">After</div><p>' + esc(b.rewritten) + "</p>" +
-        (b.why ? '<p class="hint" style="margin-top:6px">' + esc(b.why) + "</p>" : "") + "</div></div>";
-    }).join("");
-    h += '<div class="actions"><button class="btn btn-ghost btn-sm" type="button" id="copyRw">Copy all rewrites</button></div>';
-    $("rewrite").innerHTML = h;
-    $("copyRw").addEventListener("click", function () { copyText(items.map(function (b) { return "• " + b.rewritten; }).join("\n"), this); });
+
+  function switchTab(name) {
+    document.querySelectorAll("#resultTabs .tab").forEach(function (b) { b.classList.toggle("active", b.dataset.tab === name); });
+    ["analysis", "match", "rewrite", "cover"].forEach(function (id) { $(id).classList.toggle("active", id === name); });
+    load(name);
   }
-  function renderCover(d) {
-    var letter = String(d.letter || "").trim();
-    $("cover").innerHTML = '<div class="letter">' + esc(letter) + '</div><div class="actions"><button class="btn btn-primary btn-sm" type="button" id="copyCover">Copy letter</button><button class="btn btn-ghost btn-sm" type="button" id="dlCover">Download .txt</button></div>';
-    $("copyCover").addEventListener("click", function () { copyText(letter, this); });
-    $("dlCover").addEventListener("click", function () { download("cover-letter.txt", letter); });
-  }
-  function renderFail(id, err) { $(id).innerHTML = '<div class="alert err show">' + esc(err && err.message ? err.message : "This part failed — try again.") + "</div>"; }
+  document.querySelectorAll("#resultTabs .tab").forEach(function (b) { b.addEventListener("click", function () { switchTab(b.dataset.tab); }); });
 
   /* ---------- analyze ---------- */
-  $("analyzeBtn").addEventListener("click", analyze);
-  async function analyze() {
+  $("analyzeBtn").addEventListener("click", async function () {
     hideError();
     var resume = currentResume();
-    var jobTitle = $("jobTitle").value.trim() || "the target role";
-    var company = $("company").value.trim();
-    var jd = $("jobDescription").value.trim();
-    if (!key) { showError("Add your Gemini API key in step 1 first."); $("keyBox").setAttribute("open", ""); return; }
     if (resume.length < 50) { showError("Upload a PDF or paste your resume text first."); return; }
+
+    job = {
+      resume: resume.slice(0, 8000),
+      title: $("jobTitle").value.trim(),
+      company: $("company").value.trim(),
+      jd: $("jobDescription").value.trim().slice(0, 4000)
+    };
+    loaded = {};
+    ["match", "rewrite", "cover"].forEach(function (t) { $(t).innerHTML = ""; });
 
     var btn = $("analyzeBtn");
     btn.disabled = true; $("analyzeLabel").innerHTML = '<span class="spin"></span>&nbsp; Analyzing…';
     $("results").classList.add("show");
-    $("analysis").innerHTML = '<div class="scores"><div class="sk tall"></div><div class="sk tall"></div><div class="sk tall"></div></div>' + skeleton(5);
-    $("match").innerHTML = jd ? skeleton(6) : '<div class="empty">Paste a job description in step 3 to get a keyword match.</div>';
-    $("rewrite").innerHTML = skeleton(6);
-    $("cover").innerHTML = skeleton(8);
     switchTab("analysis");
     $("results").scrollIntoView({ behavior: "smooth", block: "start" });
-
-    var r = resume.slice(0, 6000), j = jd.slice(0, 3000);
-    var pAnalysis = 'You are an expert technical recruiter. Assess this resume for the role "' + jobTitle + '". Be specific and honest; refer to actual lines in the resume. Return ONLY JSON:\n' +
-      '{"score": 0-100, "ats_score": 0-100, "impact": 0-100, "skills": ["..."], "strengths": ["3-5 specific points"], "improvements": ["3-5 specific, actionable points"], "summary": "2-3 sentence assessment"}\n\nRESUME:\n' + r;
-    var pMatch = 'Compare this resume to the job description. Return ONLY JSON:\n' +
-      '{"match_score": 0-100, "matched_keywords": ["skills/keywords present in both"], "missing": ["important keywords in the job ad absent from the resume"], "verdict": "2 sentences on fit", "tips": ["3 concrete edits to tailor this resume to this ad"]}\n\nRESUME:\n' + r + '\n\nJOB DESCRIPTION:\n' + j;
-    var pRewrite = 'Pick the 4 weakest bullet points in this resume and rewrite each to be specific, quantified where the resume gives numbers (never invent numbers — use [X] as a placeholder if a metric is missing), and led by a strong verb. Return ONLY JSON:\n' +
-      '{"bullets": [{"original": "exact original text", "rewritten": "improved text", "why": "one short sentence"}]}\n\nRESUME:\n' + r;
-    var pCover = 'Write a cover letter for the role "' + jobTitle + '"' + (company ? ' at ' + company : '') + '. 250-320 words, 4 paragraphs, professional but human, no clichés, no invented facts — use only what is in the resume. Address it "Dear Hiring Manager". Return ONLY JSON:\n{"letter": "full letter text with line breaks"}\n\nRESUME:\n' + r + (j ? '\n\nJOB DESCRIPTION:\n' + j : '');
-
-    var tasks = [
-      gemini(pAnalysis, 1200).then(function (t) { renderAnalysis(parseJSON(t)); }).catch(function (e) { renderFail("analysis", e); }),
-      jd ? gemini(pMatch, 1200).then(function (t) { renderMatch(parseJSON(t)); }).catch(function (e) { renderFail("match", e); }) : Promise.resolve(),
-      gemini(pRewrite, 1400).then(function (t) { renderRewrite(parseJSON(t)); }).catch(function (e) { renderFail("rewrite", e); }),
-      gemini(pCover, 1400).then(function (t) { renderCover(parseJSON(t)); }).catch(function (e) { renderFail("cover", e); })
-    ];
-    await Promise.all(tasks);
+    await load("analysis");
     btn.disabled = false; $("analyzeLabel").textContent = "Analyze again";
-  }
+  });
 })();
 </script>
 </body>

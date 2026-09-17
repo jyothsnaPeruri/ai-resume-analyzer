@@ -1,211 +1,55 @@
-# AI Resume Analyzer Pro
+# AI Resume Analyzer
 
-An intelligent web-based resume analyzer powered by Google Gemini API. Get AI-driven insights on your resume's strengths, weaknesses, ATS compatibility, and generate professional cover letters.
+Upload a resume and get an ATS score, strengths and gaps, a keyword match against any job ad, rewritten bullet points and a tailored cover letter. No sign-up and no API key needed.
+
+**Live demo:** https://jyothsnaperuri.github.io/ai-resume-analyzer/
 
 ## Features
 
-✨ **Resume Analysis**
-- Overall resume score (0-100)
-- ATS (Applicant Tracking System) compatibility score
-- Impact score assessment
-- Identified key skills
-- Strengths and improvement suggestions
-- Professional summary
+- **Overview:** overall, ATS and impact scores, detected skills, strengths and specific improvements
+- **Job match:** match percentage, matched and missing keywords, and three concrete edits to tailor the resume
+- **Rewrites:** the four weakest bullet points rewritten with stronger verbs (never invents numbers; uses `[X]` placeholders)
+- **Cover letter:** 250–320 words, built only from facts in the resume, with copy and download
+- **PDF upload:** text is extracted in the browser with pdf.js, or paste plain text
 
-🎯 **Job Matching**
-- Match resume against job descriptions
-- Identify matched keywords and skills
-- Highlight missing skills
-- Get matching verdict
-
-✍️ **Bullet Point Rewriting**
-- AI-powered rewrite of resume bullets
-- More impactful, action-oriented language
-- Side-by-side comparison of before/after
-
-📧 **Cover Letter Generation**
-- Professional, personalized cover letters
-- 4-5 paragraph business format
-- Tailored to specific job roles
-- One-click copy to clipboard
-
-## How to Use
-
-### Prerequisites
-1. **Google Gemini API Key** (free)
-   - Visit [Google AI Studio](https://aistudio.google.com/app/apikey)
-   - Click "Create API Key"
-   - Copy your API key
-
-2. **Web Browser** (Chrome, Firefox, Safari, Edge)
-
-### Setup & Run
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/jyothsnaPeruri/ai-resume-analyzer.git
-   cd ai-resume-analyzer
-   ```
-
-2. **Open in browser**
-   - Simply open `index.html` in your web browser
-   - Or use a local server:
-     ```bash
-     # Python 3
-     python -m http.server 8000
-     
-     # Node.js (if http-server installed)
-     npx http-server
-     ```
-   - Then visit: `http://localhost:8000`
-
-3. **Add your API Key**
-   - Paste your Gemini API key in the input field
-   - Click "Save Key" (saved locally in browser)
-
-4. **Analyze Your Resume**
-   - Paste your resume text
-   - Enter target job title
-   - (Optional) Paste job description for matching
-   - Click "Analyze Resume"
-   - View results in different tabs
-
-## Technologies Used
-
-- **Frontend**: HTML5, CSS3, Vanilla JavaScript
-- **API**: Google Gemini 2.5-Flash API
-- **Storage**: Browser localStorage for API key
-- **No Dependencies**: Pure client-side app, no build tools needed
-
-## File Structure
+## How it works
 
 ```
-ai-resume-analyzer/
-├── index.html          # Main application (all-in-one file)
-├── README.md           # This file
-└── .gitignore          # Git ignore file
+Browser (this repo, GitHub Pages)          Server (FastAPI on Render)                Groq
+index.html ── POST /resume/analyze ──────► validates input, rate-limits per visitor ─► gpt-oss-120b
+            ◄── JSON result ──────────────  builds the prompt, parses JSON reply  ◄── (falls back to gpt-oss-20b)
 ```
 
-## Key Features Explained
+- The **AI key stays on the server**, so visitors never need one.
+- **Prompts live on the server**, so the endpoint can only analyse resumes and can't be used as a free general-purpose LLM.
+- **Each results tab loads the first time it's opened**, which keeps waiting time and token usage low on the free tier.
+- **Per-visitor rate limiting** (24 requests per 10 minutes), input size limits, and a retry when the model returns malformed JSON.
+- If the main model is rate-limited, the server retries on a smaller model, which has its own quota.
 
-### Resume Analysis
-Analyzes your resume for:
-- Overall quality and impact
-- ATS-friendly formatting score
-- Key competencies extracted
-- Specific strengths to highlight
-- Areas for improvement
+The backend endpoint lives in [`Research-Agent/research-agent/resume.py`](https://github.com/jyothsnaPeruri/Research-Agent/blob/master/research-agent/resume.py).
 
-### Job Matching
-Compares your resume against job requirements:
-- Percentage match score
-- Keywords that match the job
-- Missing skills to acquire/highlight
-- Recommendation on fit
+## Tech
 
-### Bullet Rewriting
-Transforms generic resume bullets into:
-- Quantified achievements
-- Action-driven statements
-- Impact-focused language
-- Industry-specific keywords
+- **Frontend:** HTML, CSS, vanilla JavaScript, pdf.js; no build step
+- **Backend:** Python, FastAPI, Pydantic validation
+- **AI:** Groq (`openai/gpt-oss-120b`, JSON mode)
+- **Hosting:** GitHub Pages (frontend), Render free tier (API)
 
-### Cover Letter
-Generates professional cover letters with:
-- Personalized opening
-- Achievement highlights
-- Skill alignment section
-- Professional closing
-- Business-appropriate tone
+## Run locally
 
-## API Limitations
+```bash
+git clone https://github.com/jyothsnaPeruri/ai-resume-analyzer.git
+cd ai-resume-analyzer
+python3 -m http.server 8000     # then open http://localhost:8000
+```
 
-- **Free tier**: Limited requests per minute
-- **High demand**: May experience delays during peak times
-- **Token limits**: Large resumes may be truncated
-- **Recommended**: Use 200-500 word resumes for best results
+The page calls the hosted API by default. To use your own backend, change `API_BASE` near the top of the script in `index.html`.
 
-If you get "Model experiencing high demand" error:
-- Wait 5-10 minutes and try again
-- Use a shorter resume
-- Try during off-peak hours (early morning/late night)
+## Notes
 
-## Security & Privacy
-
-✅ **Your Data is Safe**
-- API key stored locally in browser (not sent to any server)
-- Resume data processed only by Google Gemini
-- No data stored on our servers
-- Clear API key anytime with "Clear Key" button
-
-## Browser Compatibility
-
-| Browser | Support |
-|---------|---------|
-| Chrome | ✅ Full |
-| Firefox | ✅ Full |
-| Safari | ✅ Full |
-| Edge | ✅ Full |
-| Opera | ✅ Full |
-
-## Troubleshooting
-
-**Q: "API key loaded successfully" but can't analyze?**
-- Verify your API key is valid at [Google AI Studio](https://aistudio.google.com/app/apikey)
-- Check if you have remaining quota/credits
-
-**Q: Getting "Model experiencing high demand" error?**
-- This is temporary - wait 5-10 minutes
-- Try with a shorter resume
-- Try during off-peak times
-
-**Q: Results showing raw JSON instead of formatted?**
-- Refresh the page (Ctrl+Shift+R)
-- Clear browser cache
-- Try with a shorter resume
-
-**Q: Copy to Clipboard not working?**
-- Only works over HTTPS or localhost
-- Try manually selecting and copying text
-
-## Features Coming Soon
-
-- 📄 PDF export of analysis report
-- 🎨 Multiple resume templates
-- 🔄 Resume version history
-- 📊 Analytics dashboard
-- 🌙 Dark mode
-
-## Contributing
-
-Have ideas to improve the analyzer? 
-- Fork the repository
-- Create a feature branch
-- Submit a pull request
-
-## License
-
-This project is open source and available under the MIT License.
-
-## Author
-
-**Jyothsna Peruri**
-- GitHub: [@jyothsnaPeruri](https://github.com/jyothsnaPeruri)
-- Project: [AI Resume Analyzer](https://github.com/jyothsnaPeruri/ai-resume-analyzer)
-
-## Support
-
-If you encounter any issues:
-1. Check the [Troubleshooting](#troubleshooting) section
-2. Visit [Google AI Studio](https://aistudio.google.com) for API issues
-3. Check browser console (F12) for error messages
-
-## Disclaimer
-
-This tool is designed to provide suggestions and insights. Final resume and cover letter decisions should be made by the user. Always personalize and proofread before submission.
+- The API runs on Render's free tier, which sleeps when idle, so the first request can take up to a minute. The page pings the server on load and shows its status.
+- Resumes are sent to the API only to generate the analysis and are not stored.
 
 ---
 
-**Happy analyzing! 🚀**
-
-Get your resume AI-powered today and land your dream job!
+Built by **Jyothsna (Jo) Peruri** · [Portfolio](https://jyothsnaperuri.github.io/Jyothsna-portfolio/) · [LinkedIn](https://www.linkedin.com/in/jyothsna-jo-peruri/) · [GitHub](https://github.com/jyothsnaPeruri)
